@@ -105,12 +105,31 @@
   }
 
   .timeline-card {
-    @apply bg-card border border-border rounded-none p-6 transition-all duration-300;
+    @apply backdrop-blur-sm transition-all duration-300;
     width: 90%;
   }
 
   .timeline-card:hover {
     @apply -translate-y-1;
+  }
+  
+  /* Organic shapes for timeline cards */
+  .timeline-card::before {
+    content: '';
+    position: absolute;
+    top: -10px;
+    left: -10px;
+    right: -10px;
+    bottom: -10px;
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 100%);
+    z-index: -1;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+  }
+  
+  .timeline-card:hover::before {
+    opacity: 1;
   }
 }
 
@@ -150,6 +169,22 @@
   
   .connect-dots::after {
     @apply -bottom-16;
+  }
+  
+  /* Unique hover effects */
+  .hover-glow:hover {
+    box-shadow: 0 0 15px 2px rgba(255, 255, 255, 0.1);
+  }
+  
+  /* Year marker animations */
+  @keyframes year-marker-pulse {
+    0% { opacity: 0.7; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.05); }
+    100% { opacity: 0.7; transform: scale(1); }
+  }
+  
+  .animate-pulse-subtle {
+    animation: year-marker-pulse 5s infinite ease-in-out;
   }
 }
 
