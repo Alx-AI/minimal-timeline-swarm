@@ -106,6 +106,7 @@
 
   .timeline-card {
     @apply bg-card border border-border rounded-none p-6 transition-all duration-300;
+    width: 90%;
   }
 
   .timeline-card:hover {

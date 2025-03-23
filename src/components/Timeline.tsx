@@ -18,15 +18,40 @@ interface TimelineProps {
   items: TimelineItem[];
 }
 
-const TimelineItem: React.FC<{ item: TimelineItem; isVisible: boolean }> = ({ item, isVisible }) => {
+const getPositionClass = (index: number): string => {
+  // Create a wave pattern: left -> center -> right -> center -> left...
+  const position = index % 4;
+  
+  switch(position) {
+    case 0: return "mr-auto ml-0"; // Left
+    case 1: return "mx-auto"; // Center
+    case 2: return "ml-auto mr-0"; // Right
+    case 3: return "mx-auto"; // Center
+    default: return "mx-auto";
+  }
+};
+
+const getOffsetClass = (index: number): string => {
+  // Add vertical offset to enhance wave-like appearance
+  const offset = index % 3;
+  
+  switch(offset) {
+    case 0: return "mt-4";
+    case 1: return "mt-16";
+    case 2: return "mt-8";
+    default: return "";
+  }
+};
+
+const TimelineItem: React.FC<{ item: TimelineItem; isVisible: boolean; index: number }> = ({ item, isVisible, index }) => {
+  const positionClass = getPositionClass(index);
+  const offsetClass = getOffsetClass(index);
+  
   return (
     <div 
-      className={`relative pl-8 pb-16 transition-all duration-500 ${isVisible ? 'opacity-100' : 'opacity-0 translate-y-10'}`}
+      className={`relative pl-0 pb-24 transition-all duration-500 ${offsetClass} ${isVisible ? 'opacity-100' : 'opacity-0 translate-y-10'}`}
     >
-      <div className="timeline-dot"></div>
-      <div className="timeline-line"></div>
-      
-      <div className="timeline-card">
+      <div className={`timeline-card max-w-xl ${positionClass}`}>
         <div className="flex flex-col md:flex-row md:items-start gap-6">
           {item.imageUrl && (
             <div className="w-16 h-16 md:w-20 md:h-20 shrink-0 overflow-hidden rounded-none border border-border bg-secondary">
@@ -124,12 +149,14 @@ const Timeline: React.FC<TimelineProps> = ({ items }) => {
   }, [items]);
 
   return (
-    <div className="relative py-10" ref={timelineRef}>
+    <div className="relative py-10 flex flex-col items-center" ref={timelineRef}>
+      <div className="absolute h-full w-px bg-border mx-auto" style={{ left: 'calc(50% - 0.5px)' }}></div>
+      
       {items.map((item, index) => (
         <div 
           key={item.id}
           data-id={item.id}
-          className="timeline-item" 
+          className="timeline-item w-full" 
           ref={el => {
             if (el) {
               itemRefs.current.set(item.id, { element: el, visible: false });
@@ -138,7 +165,8 @@ const Timeline: React.FC<TimelineProps> = ({ items }) => {
         >
           <TimelineItem 
             item={item} 
-            isVisible={!!itemRefs.current.get(item.id)?.visible} 
+            isVisible={!!itemRefs.current.get(item.id)?.visible}
+            index={index}
           />
         </div>
       ))}
