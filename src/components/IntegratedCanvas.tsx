@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
-import { Calendar, Briefcase, MapPin, CircleOff } from 'lucide-react';
+import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import { Calendar, Briefcase, MapPin, CircleOff, ChevronUp, ChevronDown } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 
@@ -14,6 +14,11 @@ export interface TimelineItem {
   description: string;
   skills: string[];
   imageUrl?: string;
+  imageSlot?: {
+    url: string;
+    type: 'image' | 'video';
+    caption?: string;
+  };
 }
 
 // Structure to hold information about timeline card positions and dimensions
@@ -25,6 +30,7 @@ interface TimelineCardPosition {
   height: number;
   position: 'left' | 'center' | 'right';
   index: number;
+  imageAreaY?: number; // Bottom of the image area (if any)
 }
 
 // Particle types
@@ -63,6 +69,15 @@ interface IntegratedCanvasProps {
   particleCount?: number;
 }
 
+// Utility function to get year from date string (format: "Mon YYYY")
+const getYearFromDate = (date: string): number => {
+  const parts = date.split(' ');
+  if (parts.length > 1) {
+    return parseInt(parts[parts.length - 1]);
+  }
+  return parseInt(date);
+};
+
 const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({ 
   timelineItems, 
   particleCount = 45 
@@ -93,6 +108,28 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
     height: window.innerHeight,
     documentHeight: 0
   });
+  
+  // State for timeline order and year scrollbar
+  const [activeYear, setActiveYear] = useState<number | null>(null);
+  const scrollbarRef = useRef<HTMLDivElement>(null);
+  const yearsRef = useRef<Map<number, HTMLDivElement>>(new Map());
+  const scrollbarVisibleRef = useRef<boolean>(false);
+  const [scrollbarVisible, setScrollbarVisible] = useState(false);
+  
+  // Extract unique years from timeline items
+  const timelineYears = useMemo(() => {
+    const years = new Set<number>();
+    timelineItems.forEach(item => {
+      const year = getYearFromDate(item.startDate);
+      years.add(year);
+    });
+    return Array.from(years).sort((a, b) => b - a); // Sort in descending order
+  }, [timelineItems]);
+  
+  // Reverse the timeline items to display most recent first
+  const reversedTimelineItems = useMemo(() => {
+    return [...timelineItems].reverse();
+  }, [timelineItems]);
   
   // Update on scroll
   useEffect(() => {
@@ -170,8 +207,8 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
     const timeoutId = setTimeout(() => {
       const cards: TimelineCardPosition[] = [];
       
-      // Iterate through the timeline items and get their positions
-      timelineItems.forEach((item, index) => {
+      // Iterate through the reversed timeline items and get their positions
+      reversedTimelineItems.forEach((item, index) => {
         const element = cardRefsMap.current.get(item.id);
         if (element) {
           const rect = element.getBoundingClientRect();
@@ -184,19 +221,38 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
             default: positionType = 'center';
           }
           
+          // Find the timeline card element to get proper horizontal position
+          const timelineCardElement = element.querySelector('.timeline-card');
+          let cardRect = rect;
+          
+          if (timelineCardElement) {
+            cardRect = timelineCardElement.getBoundingClientRect();
+          }
+          
+          // Find the image slot area if it exists (it's a direct child div with class containing "mt-4")
+          let imageAreaY = undefined;
+          const imageSlotElement = timelineCardElement?.querySelector('div[class*="mt-4"]');
+          
+          if (imageSlotElement) {
+            const imageRect = imageSlotElement.getBoundingClientRect();
+            imageAreaY = imageRect.bottom + window.scrollY;
+          }
+          
           cards.push({
             id: item.id,
-            x: rect.left + rect.width / 2,
-            y: rect.top + rect.height / 2 + window.scrollY, // Adjust for scroll
-            width: rect.width,
-            height: rect.height,
+            x: cardRect.left + cardRect.width / 2, // Use the center of the actual card, not the container
+            y: cardRect.top + cardRect.height / 2 + window.scrollY, // Adjust for scroll
+            width: cardRect.width,
+            height: cardRect.height,
             position: positionType,
-            index
+            index,
+            imageAreaY
           });
         }
       });
       
-      // Save card positions
+      // Sort cards by actual DOM position (top to bottom) for proper connections
+      cards.sort((a, b) => a.y - b.y);
       timelineCardPositionsRef.current = cards;
       
       // Create connection dots between cards
@@ -229,7 +285,7 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
     }, 500);
     
     return () => clearTimeout(timeoutId);
-  }, [timelineItems]);
+  }, [reversedTimelineItems]);
   
   // Main drawing function
   const draw = useCallback(() => {
@@ -267,28 +323,50 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
         
         // Calculate scroll-adjusted positions
         const startX = startCard.x;
-        const startY = startCard.y - scrollYRef.current;
+        // Use the bottom of the image area if available, otherwise use card center
+        const startY = (startCard.imageAreaY ? startCard.imageAreaY : startCard.y) - scrollYRef.current;
         const endX = endCard.x;
         const endY = endCard.y - scrollYRef.current;
         
-        // Skip if either point is offscreen
-        if (startY < -100 || startY > dimensions.height + 100 ||
-            endY < -100 || endY > dimensions.height + 100) {
+        // Skip if either point is offscreen with a larger margin
+        if (startY < -200 || startY > dimensions.height + 200 ||
+            endY < -200 || endY > dimensions.height + 200) {
           continue;
         }
         
         // Determine control point based on card positions
         let controlPointX: number;
         
+        // Create more pronounced curves based on the relative positions of the cards
         if (startCard.position === 'left' && endCard.position === 'center') {
-          controlPointX = startX + (endX - startX) * 0.8;
+          controlPointX = startX + (endX - startX) * 0.7;
+        } else if (startCard.position === 'center' && endCard.position === 'right') {
+          controlPointX = startX + (endX - startX) * 0.3;
         } else if (startCard.position === 'right' && endCard.position === 'center') {
-          controlPointX = startX + (endX - startX) * 0.2;
+          controlPointX = startX + (endX - startX) * 0.3;
+        } else if (startCard.position === 'center' && endCard.position === 'left') {
+          controlPointX = startX + (endX - startX) * 0.7;
+        } else if (startCard.position === 'left' && endCard.position === 'right') {
+          controlPointX = (startX + endX) / 2;
+        } else if (startCard.position === 'right' && endCard.position === 'left') {
+          controlPointX = (startX + endX) / 2;
         } else {
           controlPointX = (startX + endX) / 2;
         }
         
-        const controlPointY = (startY + endY) / 2;
+        // Create a more pronounced curve for the connection
+        const midY = (startY + endY) / 2;
+        const controlPointY = startCard.imageAreaY 
+          ? startY + (endY - startY) * 0.3 // Control point closer to start when connecting from image area
+          : midY - Math.abs(endX - startX) * 0.2; // Add a slight arc to the curve
+        
+        // Draw debug lines to show control points (debug only)
+        // ctx.beginPath();
+        // ctx.moveTo(startX, startY);
+        // ctx.lineTo(controlPointX, controlPointY);
+        // ctx.lineTo(endX, endY);
+        // ctx.strokeStyle = 'rgba(255, 0, 0, 0.3)';
+        // ctx.stroke();
         
         // Get the dots for this connection
         const connectionDots = connectionDotsRef.current.filter(dot => 
@@ -555,15 +633,60 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
       default: return "";
     }
   };
-
-  // Get year from date string (format: "Mon YYYY")
-  const getYearFromDate = (date: string): number => {
-    const parts = date.split(' ');
-    if (parts.length > 1) {
-      return parseInt(parts[parts.length - 1]);
+  
+  // Add scroll to year functionality
+  const scrollToYear = useCallback((year: number) => {
+    const yearElements = document.querySelectorAll('[data-year]');
+    for (let i = 0; i < yearElements.length; i++) {
+      const element = yearElements[i];
+      if (element.getAttribute('data-year') === year.toString()) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        setActiveYear(year);
+        break;
+      }
     }
-    return parseInt(date);
-  };
+  }, []);
+  
+  // Handle scrollbar visibility
+  useEffect(() => {
+    const handleScroll = () => {
+      // Update active year based on scroll position
+      const yearElements = document.querySelectorAll('[data-year]');
+      let closestYear = null;
+      let closestDistance = Infinity;
+      
+      const viewportMiddle = window.scrollY + window.innerHeight / 2;
+      
+      yearElements.forEach(element => {
+        const rect = element.getBoundingClientRect();
+        const elementMiddle = rect.top + window.scrollY + rect.height / 2;
+        const distance = Math.abs(elementMiddle - viewportMiddle);
+        
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestYear = parseInt(element.getAttribute('data-year') || '0');
+        }
+      });
+      
+      if (closestYear !== activeYear) {
+        setActiveYear(closestYear);
+      }
+    };
+    
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [activeYear]);
+  
+  // Add mouse enter/leave handlers for scrollbar
+  const handleScrollbarMouseEnter = useCallback(() => {
+    scrollbarVisibleRef.current = true;
+    setScrollbarVisible(true);
+  }, []);
+  
+  const handleScrollbarMouseLeave = useCallback(() => {
+    scrollbarVisibleRef.current = false;
+    setScrollbarVisible(false);
+  }, []);
   
   return (
     <div className="relative">
@@ -575,10 +698,10 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
       
       {/* Timeline container */}
       <div ref={timelineContainerRef} className="relative py-10 z-10">
-        {timelineItems.map((item, index) => {
+        {reversedTimelineItems.map((item, index) => {
           const currentYear = getYearFromDate(item.startDate);
           const showYearMarker = index === 0 || 
-            getYearFromDate(timelineItems[index-1].startDate) !== currentYear;
+            getYearFromDate(reversedTimelineItems[index-1].startDate) !== currentYear;
           
           const positionClass = getPositionClass(index);
           const offsetClass = getOffsetClass(index);
@@ -588,8 +711,9 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
             <div 
               key={item.id}
               ref={el => el && cardRefsMap.current.set(item.id, el)}
-              className={`relative pl-0 pb-20 ${offsetClass} group`}
+              className={`relative pl-0 pb-12 ${offsetClass} group`}
               data-timeline-index={index}
+              data-year={currentYear}
             >
               {/* Year marker */}
               {showYearMarker && (
@@ -600,12 +724,12 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
                 </div>
               )}
               
-              {/* Timeline card */}
-              <div className={`timeline-card relative max-w-2xl ${positionClass} group-hover:shadow-lg transition-all`}>
-                <div className={`flex ${isImageLeft ? 'flex-row-reverse' : 'flex-row'} gap-5 items-start`}>
-                  {/* Image container */}
+              {/* Timeline card - made more compact */}
+              <div className={`timeline-card relative max-w-xl ${positionClass} group-hover:shadow-lg transition-all`}>
+                <div className={`flex ${isImageLeft ? 'flex-row-reverse' : 'flex-row'} gap-3 items-start`}>
+                  {/* Logo container - made smaller */}
                   {item.imageUrl ? (
-                    <div className="w-20 h-20 shrink-0 overflow-hidden bg-card rounded-md border border-border/50 shadow-sm transform transition-transform duration-300 group-hover:scale-105">
+                    <div className="w-14 h-14 shrink-0 overflow-hidden bg-card rounded-md border border-border/50 shadow-sm transform transition-transform duration-300 group-hover:scale-105">
                       <AspectRatio ratio={1} className="h-full w-full">
                         <img 
                           src={item.imageUrl} 
@@ -615,38 +739,42 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
                       </AspectRatio>
                     </div>
                   ) : (
-                    <div className="w-20 h-20 flex items-center justify-center shrink-0 bg-secondary/50 rounded-md border border-border/50">
-                      <CircleOff size={24} className="text-muted-foreground/40" />
+                    <div className="w-14 h-14 flex items-center justify-center shrink-0 bg-secondary/50 rounded-md border border-border/50">
+                      <CircleOff size={16} className="text-muted-foreground/40" />
                     </div>
                   )}
                   
-                  {/* Content */}
+                  {/* Content - more compact */}
                   <Card className="flex-1 bg-card/80 backdrop-blur-sm border border-border/50 rounded-md overflow-hidden transition-all duration-300 group-hover:border-border">
-                    <div className="p-5">
-                      <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground mb-2">
+                    <div className="p-4">
+                      <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground mb-1">
                         <Calendar size={12} />
-                        <span>{item.startDate} - {item.endDate}</span>
+                        <span>{item.startDate}</span>
                       </div>
                       
-                      <h3 className="text-lg font-sans font-medium tracking-tight">{item.title}</h3>
+                      <h3 className="text-base font-sans font-medium tracking-tight">{item.title}</h3>
                       <div className="flex flex-wrap items-center gap-2 text-xs mt-1">
                         <Briefcase size={12} className="text-primary" />
                         <span className="font-medium">{item.company}</span>
-                        <span className="text-muted-foreground">•</span>
-                        <div className="flex items-center gap-1">
-                          <MapPin size={12} className="text-muted-foreground" />
-                          <span className="text-muted-foreground">{item.location}</span>
-                        </div>
+                        {item.location && (
+                          <>
+                            <span className="text-muted-foreground">•</span>
+                            <div className="flex items-center gap-1">
+                              <MapPin size={12} className="text-muted-foreground" />
+                              <span className="text-muted-foreground">{item.location}</span>
+                            </div>
+                          </>
+                        )}
                       </div>
                       
-                      <p className="mt-3 text-sm font-mono text-foreground/80 max-w-2xl">{item.description}</p>
+                      <p className="mt-2 text-sm font-mono text-foreground/80 max-w-xl">{item.description}</p>
                       
                       {item.skills.length > 0 && (
-                        <div className="mt-4 flex flex-wrap gap-2">
+                        <div className="mt-3 flex flex-wrap gap-1">
                           {item.skills.map((skill, idx) => (
                             <span 
                               key={idx} 
-                              className="px-2 py-1 bg-secondary/50 text-secondary-foreground text-xs font-mono rounded-sm border border-border/50"
+                              className="px-2 py-0.5 bg-secondary/50 text-secondary-foreground text-xs font-mono rounded-sm border border-border/50"
                             >
                               {skill}
                             </span>
@@ -656,10 +784,86 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
                     </div>
                   </Card>
                 </div>
+                
+                {/* Image/Video slot placeholder */}
+                <div className={`mt-4 max-w-md ${positionClass} opacity-70 hover:opacity-100 transition-opacity`}>
+                  {item.imageSlot ? (
+                    <div className="border border-border/50 rounded-md overflow-hidden">
+                      {item.imageSlot.type === 'image' ? (
+                        <AspectRatio ratio={16/9} className="bg-card/30">
+                          <img 
+                            src={item.imageSlot.url} 
+                            alt={item.imageSlot.caption || `${item.company} project`} 
+                            className="w-full h-full object-cover"
+                          />
+                          {item.imageSlot.caption && (
+                            <div className="absolute bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm p-2 text-xs font-mono">
+                              {item.imageSlot.caption}
+                            </div>
+                          )}
+                        </AspectRatio>
+                      ) : (
+                        <AspectRatio ratio={16/9} className="bg-card/30">
+                          <div className="flex items-center justify-center w-full h-full">
+                            <p className="text-xs font-mono text-muted-foreground">Video content will appear here</p>
+                          </div>
+                        </AspectRatio>
+                      )}
+                    </div>
+                  ) : (
+                    <AspectRatio ratio={16/9} className="bg-card/10 border border-dashed border-border/30 rounded-md">
+                      <div className="flex items-center justify-center w-full h-full">
+                        <p className="text-xs font-mono text-muted-foreground/50">Media content placeholder</p>
+                      </div>
+                    </AspectRatio>
+                  )}
+                </div>
               </div>
             </div>
           );
         })}
+      </div>
+      
+      {/* Custom year scrollbar */}
+      <div 
+        ref={scrollbarRef}
+        className={`fixed right-8 top-1/2 -translate-y-1/2 z-20 transition-all duration-300 ${scrollbarVisible ? 'opacity-100 transform translate-x-0' : 'opacity-30 hover:opacity-60 transform translate-x-2'}`}
+        onMouseEnter={handleScrollbarMouseEnter}
+        onMouseLeave={handleScrollbarMouseLeave}
+      >
+        <div className="relative bg-background/30 backdrop-blur-sm border border-border/50 rounded-full py-2 px-1 shadow-md">
+          {/* Scroll up button */}
+          <button 
+            className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-secondary/50 transition-colors"
+            onClick={() => scrollToYear(timelineYears[0])}
+            aria-label="Scroll to most recent year"
+          >
+            <ChevronUp size={16} className="text-foreground/80" />
+          </button>
+          
+          {/* Year markers */}
+          <div className="py-2 flex flex-col items-center">
+            {timelineYears.map(year => (
+              <div 
+                key={year} 
+                ref={el => el && yearsRef.current.set(year, el)}
+                className={`my-1 px-3 py-1.5 text-xs font-mono rounded-md cursor-pointer transition-all duration-200 ${activeYear === year ? 'bg-primary/20 font-bold text-primary scale-110' : 'hover:bg-secondary/40'}`}
+                onClick={() => scrollToYear(year)}
+              >
+                {year}
+              </div>
+            ))}
+          </div>
+          
+          {/* Scroll down button */}
+          <button 
+            className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-secondary/50 transition-colors"
+            onClick={() => scrollToYear(timelineYears[timelineYears.length - 1])}
+            aria-label="Scroll to earliest year"
+          >
+            <ChevronDown size={16} className="text-foreground/80" />
+          </button>
+        </div>
       </div>
     </div>
   );

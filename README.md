@@ -1,69 +1,79 @@
-# Welcome to your Lovable project
+# Minimal Timeline Swarm
 
-## Project info
+An interactive timeline portfolio with a dynamic particle background. This project showcases a modern, minimalist approach to displaying a professional timeline with animated elements and cursor interactions.
 
-**URL**: https://lovable.dev/projects/d2735455-e69f-4ae6-bdd4-e63a74382794
+## Features
 
-## How can I edit this code?
+- **Integrated Canvas Background & Timeline**: A unified canvas rendering both the interactive particle background and timeline connections
+- **Animated Dot Connections**: Curved paths with animated dots that connect timeline entries
+- **Cursor Interaction**: Background particles and connection dots respond to cursor movements
+- **Image/Video Slots**: Support for media content beneath each timeline entry
+- **Year-based Navigation**: Custom scrollbar with year markers for quick navigation
+- **Reverse Chronological Order**: Displays most recent experiences first
+- **Dark/Light Theme Toggle**: Seamless theme switching with appropriate visual adjustments
 
-There are several ways of editing your application.
+## Technologies Used
 
-**Use Lovable**
+- **React**: For component-based UI development
+- **TypeScript**: For type-safe code
+- **Tailwind CSS**: For utility-first styling
+- **Shadcn UI**: For accessible UI components
+- **HTML Canvas API**: For performant animations and interactions
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/d2735455-e69f-4ae6-bdd4-e63a74382794) and start prompting.
-
-Changes made via Lovable will be committed automatically to this repo.
-
-**Use your preferred IDE**
-
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
-
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
-
-Follow these steps:
+## Getting Started
 
 ```sh
-# Step 1: Clone the repository using the project's Git URL.
+# Clone the repository
 git clone <YOUR_GIT_URL>
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# Navigate to the project directory
+cd minimal-timeline-swarm
 
-# Step 3: Install the necessary dependencies.
-npm i
+# Install dependencies
+npm install
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
+# Start the development server
 npm run dev
 ```
 
-**Edit a file directly in GitHub**
+## Component Structure
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+- **IntegratedCanvas**: The main component that renders both the background particles and timeline
+- **Header**: Displays the user profile information
+- **ThemeToggle**: Manages theme switching
 
-**Use GitHub Codespaces**
+## Canvas Animation Details
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+The canvas animation system includes:
+- Background particles with subtle movement
+- Cursor particle effects
+- Dot connections between timeline items
+- Mouse interaction with all animated elements
 
-## What technologies are used for this project?
+Performance optimizations:
+- Throttled mouse event handling
+- Conditional state updates
+- Ref-based direct DOM manipulations for animations
+- Selective rendering based on viewport visibility
 
-This project is built with .
+## Implementation Notes
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+The integrated canvas approach combines what were previously separate components (Swarm and Timeline) into a single unified component that shares interaction logic and rendering. This provides a more cohesive user experience and better performance.
 
-## How can I deploy this project?
+## Customization
 
-Simply open [Lovable](https://lovable.dev/projects/d2735455-e69f-4ae6-bdd4-e63a74382794) and click on Share -> Publish.
+Timeline entries can be easily customized in the `src/pages/Index.tsx` file by modifying the `timelineData` array. Each entry supports:
 
-## I want to use a custom domain - is that possible?
+- Title, company, and location information
+- Date ranges
+- Descriptions
+- Skills tags
+- Optional images/videos for projects
 
-We don't support custom domains (yet). If you want to deploy your project under your own domain then we recommend using Netlify. Visit our docs for more details: [Custom domains](https://docs.lovable.dev/tips-tricks/custom-domain/)
+## LICENSE
+
+MIT
+
+---
+
+_See [CLAUDE.md](./CLAUDE.md) for additional development guidelines._
