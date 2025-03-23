@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef } from 'react';
-import { Calendar, Briefcase, MapPin, Award } from 'lucide-react';
+import { Calendar, Briefcase, MapPin } from 'lucide-react';
 
 export interface TimelineItem {
   id: string;
@@ -21,48 +21,48 @@ interface TimelineProps {
 const TimelineItem: React.FC<{ item: TimelineItem; isVisible: boolean }> = ({ item, isVisible }) => {
   return (
     <div 
-      className={`relative pl-10 pb-10 transition-all duration-500 ${isVisible ? 'opacity-100' : 'opacity-0 translate-y-10'}`}
+      className={`relative pl-8 pb-16 transition-all duration-500 ${isVisible ? 'opacity-100' : 'opacity-0 translate-y-10'}`}
     >
       <div className="timeline-dot"></div>
       <div className="timeline-line"></div>
       
       <div className="timeline-card">
-        <div className="flex flex-col md:flex-row md:items-start gap-4">
+        <div className="flex flex-col md:flex-row md:items-start gap-6">
           {item.imageUrl && (
-            <div className="w-16 h-16 md:w-20 md:h-20 shrink-0 overflow-hidden rounded-lg border border-border">
+            <div className="w-16 h-16 md:w-20 md:h-20 shrink-0 overflow-hidden rounded-none border border-border bg-secondary">
               <img 
                 src={item.imageUrl} 
                 alt={`${item.company} logo`} 
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover mix-blend-multiply grayscale contrast-125"
               />
             </div>
           )}
           
           <div className="flex-1">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground mb-1">
-              <Calendar size={14} />
+            <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground mb-2">
+              <Calendar size={12} />
               <span>{item.startDate} - {item.endDate}</span>
             </div>
             
-            <h3 className="text-xl font-semibold">{item.title}</h3>
-            <div className="flex items-center gap-2 text-sm mt-1">
-              <Briefcase size={14} className="text-primary" />
+            <h3 className="text-xl font-sans font-medium tracking-tight">{item.title}</h3>
+            <div className="flex items-center gap-2 text-xs mt-1">
+              <Briefcase size={12} className="text-primary" />
               <span className="font-medium">{item.company}</span>
               <span className="text-muted-foreground">•</span>
               <div className="flex items-center gap-1">
-                <MapPin size={14} className="text-muted-foreground" />
+                <MapPin size={12} className="text-muted-foreground" />
                 <span className="text-muted-foreground">{item.location}</span>
               </div>
             </div>
             
-            <p className="mt-3 text-sm md:text-base text-balance">{item.description}</p>
+            <p className="mt-3 text-sm font-mono text-foreground/80 text-balance max-w-2xl">{item.description}</p>
             
             {item.skills.length > 0 && (
               <div className="mt-4 flex flex-wrap gap-2">
                 {item.skills.map((skill, index) => (
                   <span 
                     key={index} 
-                    className="px-2 py-1 bg-secondary text-secondary-foreground text-xs rounded-md"
+                    className="px-2 py-1 bg-secondary text-secondary-foreground text-xs font-mono rounded-none border border-border"
                   >
                     {skill}
                   </span>
