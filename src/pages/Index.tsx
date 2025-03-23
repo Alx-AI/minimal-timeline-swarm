@@ -1,9 +1,7 @@
-
 import React, { useEffect, useState } from 'react';
 import Header from '@/components/Header';
-import Timeline, { TimelineItem } from '@/components/Timeline';
-import Swarm from '@/components/Swarm';
 import ThemeToggle from '@/components/ThemeToggle';
+import IntegratedCanvas, { TimelineItem } from '@/components/IntegratedCanvas';
 
 // Company logos
 const EVERY_LOGO = '/lovable-uploads/45cfada8-9bdd-44a4-9f79-1f2a5d71dfde.png';
@@ -146,7 +144,6 @@ const Index = () => {
   return (
     <div className="relative min-h-screen">
       <ThemeToggle />
-      <Swarm particleCount={30} />
       
       <div className="max-w-4xl mx-auto px-4 pt-10 pb-20 sm:px-6 lg:px-8 relative z-10">
         <Header 
@@ -156,7 +153,7 @@ const Index = () => {
         />
         
         <main className="mt-20">
-          <Timeline items={timelineData} />
+          <IntegratedCanvas timelineItems={timelineData} particleCount={45} />
         </main>
         
         <footer className="py-10 text-center text-muted-foreground text-xs font-mono">

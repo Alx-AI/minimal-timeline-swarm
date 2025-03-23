@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -92,6 +91,10 @@ export default {
 					'0%, 100%': { opacity: '1' },
 					'50%': { opacity: '0.7' }
 				},
+				'pulse-slow': {
+					'0%, 100%': { opacity: '0.6' },
+					'50%': { opacity: '0.3' }
+				},
 				'grain': {
 					'0%, 100%': { transform: 'translate(0, 0)' },
 					'10%': { transform: 'translate(-5%, -5%)' },
@@ -113,6 +116,7 @@ export default {
 				'timeline-fade-in': 'timeline-fade-in 0.8s ease-out',
 				'float': 'float 5s ease-in-out infinite',
 				'pulse-subtle': 'pulse-subtle 3s ease-in-out infinite',
+				'pulse-slow': 'pulse-slow 6s ease-in-out infinite',
 				'grain': 'grain 8s steps(10) infinite'
 			}
 		}
