@@ -144,18 +144,18 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden">
+    <div className="relative min-h-screen">
       <ThemeToggle />
-      <Swarm particleCount={100} />
+      <Swarm particleCount={30} />
       
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+      <div className="max-w-4xl mx-auto px-4 pt-10 pb-20 sm:px-6 lg:px-8 relative z-10">
         <Header 
           name="AlxAi"
           title="Building teams & tools to empower people"
           summary="Creating and leading teams to develop innovative AI solutions that enhance human capabilities. Specializing in generative AI, machine learning, and building tools that people love to use."
         />
         
-        <main>
+        <main className="mt-20">
           <Timeline items={timelineData} />
         </main>
         

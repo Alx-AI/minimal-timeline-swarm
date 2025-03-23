@@ -1,5 +1,5 @@
 
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { Calendar, Briefcase, MapPin } from 'lucide-react';
 
 export interface TimelineItem {
@@ -43,18 +43,16 @@ const getOffsetClass = (index: number): string => {
   }
 };
 
-const TimelineItem: React.FC<{ item: TimelineItem; isVisible: boolean; index: number }> = ({ item, isVisible, index }) => {
+const TimelineItem: React.FC<{ item: TimelineItem; index: number }> = ({ item, index }) => {
   const positionClass = getPositionClass(index);
   const offsetClass = getOffsetClass(index);
   
   return (
-    <div 
-      className={`relative pl-0 pb-24 transition-all duration-500 ${offsetClass} ${isVisible ? 'opacity-100' : 'opacity-0 translate-y-10'}`}
-    >
-      <div className={`timeline-card max-w-xl ${positionClass}`}>
-        <div className="flex flex-col md:flex-row md:items-start gap-6">
+    <div className={`relative pl-0 pb-16 ${offsetClass}`}>
+      <div className={`timeline-card max-w-xs sm:max-w-sm md:max-w-md ${positionClass}`}>
+        <div className="flex flex-col gap-4">
           {item.imageUrl && (
-            <div className="w-16 h-16 md:w-20 md:h-20 shrink-0 overflow-hidden rounded-none border border-border bg-secondary">
+            <div className="w-12 h-12 shrink-0 overflow-hidden rounded-none border border-border bg-secondary">
               <img 
                 src={item.imageUrl} 
                 alt={`${item.company} logo`} 
@@ -63,14 +61,14 @@ const TimelineItem: React.FC<{ item: TimelineItem; isVisible: boolean; index: nu
             </div>
           )}
           
-          <div className="flex-1">
+          <div>
             <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground mb-2">
               <Calendar size={12} />
               <span>{item.startDate} - {item.endDate}</span>
             </div>
             
-            <h3 className="text-xl font-sans font-medium tracking-tight">{item.title}</h3>
-            <div className="flex items-center gap-2 text-xs mt-1">
+            <h3 className="text-lg font-sans font-medium tracking-tight">{item.title}</h3>
+            <div className="flex flex-wrap items-center gap-2 text-xs mt-1">
               <Briefcase size={12} className="text-primary" />
               <span className="font-medium">{item.company}</span>
               <span className="text-muted-foreground">•</span>
@@ -80,7 +78,7 @@ const TimelineItem: React.FC<{ item: TimelineItem; isVisible: boolean; index: nu
               </div>
             </div>
             
-            <p className="mt-3 text-sm font-mono text-foreground/80 text-balance max-w-2xl">{item.description}</p>
+            <p className="mt-3 text-sm font-mono text-foreground/80 max-w-2xl">{item.description}</p>
             
             {item.skills.length > 0 && (
               <div className="mt-4 flex flex-wrap gap-2">
@@ -102,73 +100,14 @@ const TimelineItem: React.FC<{ item: TimelineItem; isVisible: boolean; index: nu
 };
 
 const Timeline: React.FC<TimelineProps> = ({ items }) => {
-  const timelineRef = useRef<HTMLDivElement>(null);
-  const itemRefs = useRef<Map<string, { element: HTMLDivElement; visible: boolean }>>(new Map());
-  
-  useEffect(() => {
-    const observerOptions = {
-      root: null,
-      rootMargin: '0px',
-      threshold: 0.1,
-    };
-
-    const handleIntersect = (entries: IntersectionObserverEntry[]) => {
-      entries.forEach(entry => {
-        const id = entry.target.getAttribute('data-id');
-        if (id && itemRefs.current.has(id)) {
-          const item = itemRefs.current.get(id);
-          if (item) {
-            item.visible = entry.isIntersecting;
-            const element = entry.target as HTMLDivElement;
-            if (entry.isIntersecting) {
-              element.classList.remove('opacity-0', 'translate-y-10');
-              element.classList.add('opacity-100', 'translate-y-0');
-            }
-          }
-        }
-      });
-    };
-
-    const observer = new IntersectionObserver(handleIntersect, observerOptions);
-
-    // Get all timeline item elements
-    const timelineItems = timelineRef.current?.querySelectorAll('.timeline-item');
-    if (timelineItems) {
-      timelineItems.forEach(item => {
-        observer.observe(item);
-      });
-    }
-
-    return () => {
-      if (timelineItems) {
-        timelineItems.forEach(item => {
-          observer.unobserve(item);
-        });
-      }
-    };
-  }, [items]);
-
   return (
-    <div className="relative py-10 flex flex-col items-center" ref={timelineRef}>
-      <div className="absolute h-full w-px bg-border mx-auto" style={{ left: 'calc(50% - 0.5px)' }}></div>
-      
+    <div className="relative py-10">      
       {items.map((item, index) => (
-        <div 
+        <TimelineItem 
           key={item.id}
-          data-id={item.id}
-          className="timeline-item w-full" 
-          ref={el => {
-            if (el) {
-              itemRefs.current.set(item.id, { element: el, visible: false });
-            }
-          }}
-        >
-          <TimelineItem 
-            item={item} 
-            isVisible={!!itemRefs.current.get(item.id)?.visible}
-            index={index}
-          />
-        </div>
+          item={item} 
+          index={index}
+        />
       ))}
     </div>
   );

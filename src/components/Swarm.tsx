@@ -8,21 +8,18 @@ type Particle = {
   speedX: number;
   speedY: number;
   opacity: number;
-  connections: number[];
 };
 
 interface SwarmProps {
   particleCount?: number;
 }
 
-const Swarm: React.FC<SwarmProps> = ({ particleCount = 100 }) => {
+const Swarm: React.FC<SwarmProps> = ({ particleCount = 30 }) => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [particles, setParticles] = useState<Particle[]>([]);
   const requestRef = useRef<number>();
-  const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [dimensions, setDimensions] = useState({ width: window.innerWidth, height: window.innerHeight });
-  const connectionDistance = 150; // Maximum distance for particle connections
 
   // Initialize canvas and particles
   useEffect(() => {
@@ -43,11 +40,10 @@ const Swarm: React.FC<SwarmProps> = ({ particleCount = 100 }) => {
       initialParticles.push({
         x: Math.random() * dimensions.width,
         y: Math.random() * dimensions.height,
-        size: Math.random() * 2.5 + 0.5,
-        speedX: (Math.random() - 0.5) * 0.5,
-        speedY: (Math.random() - 0.5) * 0.5,
-        opacity: Math.random() * 0.5 + 0.1,
-        connections: []
+        size: Math.random() * 2 + 0.5,
+        speedX: (Math.random() - 0.5) * 0.2,
+        speedY: (Math.random() - 0.5) * 0.2,
+        opacity: Math.random() * 0.3 + 0.1
       });
     }
 
@@ -79,45 +75,8 @@ const Swarm: React.FC<SwarmProps> = ({ particleCount = 100 }) => {
     ctx.fillStyle = backgroundColor;
     ctx.fillRect(0, 0, dimensions.width, dimensions.height);
 
-    // Update particles and reset connections
-    const updatedParticles = particles.map(particle => ({
-      ...particle,
-      connections: []
-    }));
-
-    // Draw connections
-    ctx.strokeStyle = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
-    ctx.lineWidth = 0.5;
-
-    // Find connections
-    for (let i = 0; i < updatedParticles.length; i++) {
-      for (let j = i + 1; j < updatedParticles.length; j++) {
-        const dx = updatedParticles[i].x - updatedParticles[j].x;
-        const dy = updatedParticles[i].y - updatedParticles[j].y;
-        const distance = Math.sqrt(dx * dx + dy * dy);
-
-        if (distance < connectionDistance) {
-          ctx.beginPath();
-          ctx.moveTo(updatedParticles[i].x, updatedParticles[i].y);
-          ctx.lineTo(updatedParticles[j].x, updatedParticles[j].y);
-          
-          // Make opacity proportional to distance
-          const opacity = 1 - (distance / connectionDistance);
-          ctx.strokeStyle = isDarkMode 
-            ? `rgba(255, 255, 255, ${opacity * 0.15})` 
-            : `rgba(0, 0, 0, ${opacity * 0.15})`;
-            
-          ctx.stroke();
-          
-          // Add to connections
-          updatedParticles[i].connections.push(j);
-          updatedParticles[j].connections.push(i);
-        }
-      }
-    }
-
-    // Draw particles
-    for (const particle of updatedParticles) {
+    // Draw particles only
+    for (const particle of particles) {
       ctx.beginPath();
       ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
       ctx.fillStyle = isDarkMode 
@@ -126,26 +85,24 @@ const Swarm: React.FC<SwarmProps> = ({ particleCount = 100 }) => {
       ctx.fill();
     }
     
-    // Mouse interaction - draw connections to nearby particles
-    ctx.strokeStyle = isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.2)';
+    // Simplified mouse interaction - just a few connections to closest particles
+    ctx.strokeStyle = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
     ctx.lineWidth = 0.5;
     
-    for (const particle of updatedParticles) {
+    // Find 3 closest particles
+    const distances = particles.map((particle, index) => {
       const dx = mousePosition.x - particle.x;
       const dy = mousePosition.y - particle.y;
       const distance = Math.sqrt(dx * dx + dy * dy);
-      
-      if (distance < connectionDistance * 2) {
+      return { index, distance };
+    }).sort((a, b) => a.distance - b.distance).slice(0, 3);
+    
+    // Draw connections only to these closest particles
+    for (const { index, distance } of distances) {
+      if (distance < 150) {
         ctx.beginPath();
-        ctx.moveTo(particle.x, particle.y);
+        ctx.moveTo(particles[index].x, particles[index].y);
         ctx.lineTo(mousePosition.x, mousePosition.y);
-        
-        // Make opacity proportional to distance
-        const opacity = 1 - (distance / (connectionDistance * 2));
-        ctx.strokeStyle = isDarkMode 
-          ? `rgba(255, 255, 255, ${opacity * 0.3})` 
-          : `rgba(0, 0, 0, ${opacity * 0.3})`;
-          
         ctx.stroke();
       }
     }
@@ -167,18 +124,18 @@ const Swarm: React.FC<SwarmProps> = ({ particleCount = 100 }) => {
           const dy = mousePosition.y - particle.y;
           const distance = Math.sqrt(dx * dx + dy * dy);
           
-          // Mouse influence (stronger attraction)
+          // Mouse influence (very light)
           let newSpeedX = particle.speedX;
           let newSpeedY = particle.speedY;
           
-          if (distance < 200) {
-            // Stronger attraction to mouse
-            newSpeedX += dx / distance * 0.05;
-            newSpeedY += dy / distance * 0.05;
+          if (distance < 100) {
+            // Very light attraction
+            newSpeedX += dx / distance * 0.01;
+            newSpeedY += dy / distance * 0.01;
           }
           
-          // Apply maximum speed limit
-          const maxSpeed = 1.2;
+          // Apply maximum speed limit (much lower)
+          const maxSpeed = 0.3;
           const speedMagnitude = Math.sqrt(newSpeedX * newSpeedX + newSpeedY * newSpeedY);
           if (speedMagnitude > maxSpeed) {
             newSpeedX = (newSpeedX / speedMagnitude) * maxSpeed;
@@ -218,10 +175,10 @@ const Swarm: React.FC<SwarmProps> = ({ particleCount = 100 }) => {
   }, [mousePosition, particles, dimensions]);
 
   return (
-    <div className="swarm-container" ref={containerRef}>
+    <div className="swarm-container fixed top-0 left-0 w-full h-full -z-10 pointer-events-none">
       <canvas 
         ref={canvasRef} 
-        className="absolute top-0 left-0 w-full h-full -z-10"
+        className="fixed top-0 left-0 w-full h-full -z-10"
       />
     </div>
   );
