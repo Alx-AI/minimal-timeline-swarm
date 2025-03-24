@@ -14,7 +14,7 @@ const timelineData: TimelineItem[] = [
     company: "ENSEEIHT",
     location: "Toulouse, France",
     description: "Worked with the Parallel Algorithms and Optimization team to realistically model plane routes around a simulation of the earth in C++.",
-    tags: ['Data'],
+    tags: ['Data', 'Education'],
     imageUrl: ""
   },
   {
@@ -36,7 +36,7 @@ const timelineData: TimelineItem[] = [
     company: "Hasbro",
     location: "Los Angeles, California",
     description: "Built interactive toy prototypes—wired circuits, coded custom chips— and pitched my own toy, a \"Bop-It\" that taught you about music as you played.",
-    tags: ['Games', 'Education'],
+    tags: ['Games', 'Education', 'Robotics', 'AI'],
     imageUrl: "",
     imageSlot: {
       url: "/assets/hasbro.mp4",
@@ -53,7 +53,7 @@ const timelineData: TimelineItem[] = [
     company: "Amazon Robotics",
     location: "Boston, Massachusetts",
     description: "Built a computer vision system for autonomous warehouse robots. Made it possible for robots to see and navigate around the warehouses safely around humans.",
-    tags: ['AI', 'Robotics'],
+    tags: ['AI', 'Robotics', 'Data'],
     imageUrl: "",
     imageSlot: {
       url: "/assets/ar.mp4",
@@ -70,7 +70,7 @@ const timelineData: TimelineItem[] = [
     company: "EY Consulting – Disney+",
     location: "Los Angeles, California",
     description: "Led data team that built the payment processing system for Disney+, handled billions of transactions, and built a predictive analytics initiative improving user acquisition.",
-    tags: ['Data', 'Media'],
+    tags: ['Data', 'Media', 'AI'],
     imageUrl: "",
     imageSlot: {
       url: "/assets/disney.png",
@@ -98,7 +98,7 @@ const timelineData: TimelineItem[] = [
     company: "Byte Size Arxiv",
     location: "Remote",
     description: "Founded Byte Size Arxiv, used NLP to autonomously turn all research papers on Arxiv.org into accessible summaries every single day.",
-    tags: ['AI', 'Education'],
+    tags: ['AI', 'Education', 'Data'],
     imageUrl: "",
     imageSlot: {
       url: "/assets/bsa.mp4",
@@ -115,7 +115,7 @@ const timelineData: TimelineItem[] = [
     company: "Inertia Education",
     location: "Remote",
     description: "Created Inertia Education, AI-driven software helping teachers use AI to save time grading and provide students with more tailored feedback. Finalist for the Future Forum on Learning - Tools Competition.",
-    tags: ['AI', 'Education'],
+    tags: ['AI', 'Education', 'Data'],
     imageUrl: "",
     imageSlot: {
       url: "/assets/inertia.png",
@@ -132,7 +132,7 @@ const timelineData: TimelineItem[] = [
     company: "EY Consulting, Federal Aviation Administration",
     location: "Remote",
     description: "Modernized the FAA's data infrastructure and built ML-powered analytics dashboards to empower the team.",
-    tags: ['Data', 'AI'],
+    tags: ['Data', 'AI', 'Education'],
     imageUrl: "",
   },
   {
@@ -160,7 +160,7 @@ const timelineData: TimelineItem[] = [
     company: "NounsAI",
     location: "Remote",
     description: "Founded NounsAI, providing generative AI and dynamic knowledge tools for DAOs, engaging tens of thousands of users. Built some of the first dedicated AI video and AI audio interfaces ever made.",
-    tags: ['AI', 'Media'],
+    tags: ['AI', 'Media', 'Data'],
     imageUrl: "",
     imageSlot: {
       url: "",
@@ -195,7 +195,7 @@ const timelineData: TimelineItem[] = [
     company: "PlaiDay App",
     location: "Los Angeles",
     description: "Launched PlaiDay, democratizing personalized generative AI. Released the first personalized text to video generator ever. Partnered with Lionsgate for \"The Hunger Games\" movie launch.",
-    tags: ['AI', 'Media'],
+    tags: ['AI', 'Media', 'Games', 'Data'],
     imageUrl: "",
     imageSlot: {
       url: "/assets/plai.png",
@@ -225,11 +225,11 @@ const timelineData: TimelineItem[] = [
     id: "15",
     startDate: "May 2024",
     endDate: "Present",
-    title: "AI Visualization Platform for Drug Discovery",
+    title: "AI Workflow Creation Platform — Drug Discovery & More.",
     company: "Salt AI",
     location: "Los Angeles",
     description: "Launched Salt AI's Python visualization platform, accelerating design and deployment of generative AI workflows including: drug discovery research, generative art, chat with my data, etc.",
-    tags: ['AI', 'Life Sciences', 'Data'],
+    tags: ['AI', 'Life Sciences', 'Data', 'Education', 'Media', 'Games'],
     imageUrl: "",
     imageSlot: {
       url: "/assets/salt.png",
@@ -246,7 +246,7 @@ const timelineData: TimelineItem[] = [
     company: "ComfyUI Global Leadership Summit",
     location: "Los Angeles",
     description: "Delivered keynote at the inaugural ComfyUI Leadership Summit, discussing accessible AI interfaces where teams showed work at Coachella, on major motion pictures, and epic real world laser shows.",
-    tags: ['AI', 'Media'],
+    tags: ['AI', 'Media', 'Games'],
     imageUrl: "",
     imageSlot: {
       url: "",
@@ -264,7 +264,7 @@ const timelineData: TimelineItem[] = [
     company: "Every Inc.",
     location: "Brooklyn, New York",
     description: "Began consulting with Every Inc., guiding enterprise AI strategies and implementations. Led multiple six-figure deals training private equity, VC, hedge fund, and tech companies on best practices of AI adoption with strategic implementation.",
-    tags: ['AI', 'Education'],
+    tags: ['AI', 'Education', 'Data'],
     imageUrl: "",
     imageSlot: {
       url: "/assets/every.png",
@@ -298,7 +298,7 @@ const timelineData: TimelineItem[] = [
     company: "Every Inc.",
     location: "Brooklyn, New York",
     description: "Leading AI training and consulting, expanding clientele among Fortune 500 companies, technology companies, and financial firms internationally; authoring the \"Context Window\" column on our 100,000 subscriber newsletter—about what comes next.",
-    tags: ['AI', 'Education', 'Media'],
+    tags: ['AI', 'Education', 'Media', 'Data'],
     imageUrl: "",
     imageSlot: {
       url: "/assets/cw.png",

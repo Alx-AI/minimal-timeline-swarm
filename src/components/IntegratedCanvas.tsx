@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
-import { Calendar, Briefcase, MapPin, CircleOff, ChevronUp, ChevronDown } from 'lucide-react';
+import { Calendar, Briefcase, MapPin, CircleOff, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import useCursorStore from '@/utils/cursorStore';
@@ -126,6 +126,9 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
   const scrollbarVisibleRef = useRef<boolean>(false);
   const [scrollbarVisible, setScrollbarVisible] = useState(false);
   
+  // State to track if we're on a mobile device
+  const [isMobile, setIsMobile] = useState(false);
+  
   // Extract unique years from timeline items
   const timelineYears = useMemo(() => {
     const years = new Set<number>();
@@ -163,95 +166,98 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
   
-  // Resize handler
+  // Update dimensions and check for mobile layout on resize
   useEffect(() => {
-    const handleResize = () => {
-      if (document.body) {
-        setDimensions({ 
-          width: window.innerWidth, 
-          height: window.innerHeight,
-          documentHeight: document.body.scrollHeight
-        });
-        
-        // When resizing, we need to recalculate timeline card positions
-        // Use a timeout to avoid excessive calculations during resize
-        if (timelineContainerRef.current) {
-          setTimeout(() => {
-            const cards: TimelineCardPosition[] = [];
-            
-            reversedTimelineItems.forEach((item, index) => {
-              const element = cardRefsMap.current.get(item.id);
-              if (element) {
-                const rect = element.getBoundingClientRect();
-                const position = index % 4;
-                
-                let positionType: 'left' | 'center' | 'right';
-                switch(position) {
-                  case 0: positionType = 'left'; break;
-                  case 2: positionType = 'right'; break;
-                  default: positionType = 'center';
-                }
-                
-                const timelineCardElement = element.querySelector('.timeline-card');
-                let cardRect = rect;
-                
-                if (timelineCardElement) {
-                  cardRect = timelineCardElement.getBoundingClientRect();
-                }
-                
-                let imageAreaY = undefined;
-                const mediaSlotElement = timelineCardElement?.querySelector('.media-slot, .media-slot-placeholder');
-                
-                if (mediaSlotElement) {
-                  const mediaRect = mediaSlotElement.getBoundingClientRect();
-                  // Check if media is beside content (horizontal layout) or below (vertical)
-                  const isHorizontalLayout = window.innerWidth >= 768 && 
-                    ((mediaRect.left > cardRect.left + cardRect.width / 2) || 
-                     (mediaRect.right < cardRect.left + cardRect.width / 2));
-                  
-                  if (isHorizontalLayout) {
-                    // For horizontal layout, use the bottom of the entire card
-                    imageAreaY = Math.max(cardRect.bottom, mediaRect.bottom) + window.scrollY;
-                  } else {
-                    // For vertical layout, use the bottom of the media area
-                    imageAreaY = mediaRect.bottom + window.scrollY;
-                  }
-                }
-                
-                cards.push({
-                  id: item.id,
-                  x: cardRect.left + cardRect.width / 2,
-                  y: cardRect.top + cardRect.height / 2 + window.scrollY,
-                  width: cardRect.width,
-                  height: cardRect.height,
-                  position: positionType,
-                  index,
-                  imageAreaY
-                });
+    const updateDimensions = () => {
+      const width = window.innerWidth;
+      const height = window.innerHeight;
+      const isMobileView = width < 768; // Standard mobile breakpoint
+      
+      setDimensions({ 
+        width, 
+        height,
+        documentHeight: document.documentElement.scrollHeight
+      });
+      setIsMobile(isMobileView);
+      
+      // When resizing, we need to recalculate timeline card positions
+      // Use a timeout to avoid excessive calculations during resize
+      if (timelineContainerRef.current) {
+        setTimeout(() => {
+          const cards: TimelineCardPosition[] = [];
+          
+          reversedTimelineItems.forEach((item, index) => {
+            const element = cardRefsMap.current.get(item.id);
+            if (element) {
+              const rect = element.getBoundingClientRect();
+              const position = index % 4;
+              
+              let positionType: 'left' | 'center' | 'right';
+              switch(position) {
+                case 0: positionType = 'left'; break;
+                case 2: positionType = 'right'; break;
+                default: positionType = 'center';
               }
-            });
-            
-            timelineCardPositionsRef.current = cards;
-          }, 100);
-        }
+              
+              const timelineCardElement = element.querySelector('.timeline-card');
+              let cardRect = rect;
+              
+              if (timelineCardElement) {
+                cardRect = timelineCardElement.getBoundingClientRect();
+              }
+              
+              let imageAreaY = undefined;
+              const mediaSlotElement = timelineCardElement?.querySelector('.media-slot, .media-slot-placeholder');
+              
+              if (mediaSlotElement) {
+                const mediaRect = mediaSlotElement.getBoundingClientRect();
+                // Check if media is beside content (horizontal layout) or below (vertical)
+                const isHorizontalLayout = window.innerWidth >= 768 && 
+                  ((mediaRect.left > cardRect.left + cardRect.width / 2) || 
+                   (mediaRect.right < cardRect.left + cardRect.width / 2));
+                
+                if (isHorizontalLayout) {
+                  // For horizontal layout, use the bottom of the entire card
+                  imageAreaY = Math.max(cardRect.bottom, mediaRect.bottom) + window.scrollY;
+                } else {
+                  // For vertical layout, use the bottom of the media area
+                  imageAreaY = mediaRect.bottom + window.scrollY;
+                }
+              }
+              
+              cards.push({
+                id: item.id,
+                x: cardRect.left + cardRect.width / 2,
+                y: cardRect.top + cardRect.height / 2 + window.scrollY,
+                width: cardRect.width,
+                height: cardRect.height,
+                position: positionType,
+                index,
+                imageAreaY
+              });
+            }
+          });
+          
+          timelineCardPositionsRef.current = cards;
+        }, 100);
       }
     };
-
+    
     // Initial call and event listener
-    handleResize();
-    window.addEventListener('resize', handleResize, { passive: true });
+    updateDimensions();
+    window.addEventListener('resize', updateDimensions);
     
     // Also listen for media query changes specifically for the breakpoint we care about
     const mediaQuery = window.matchMedia('(min-width: 768px)');
     const handleMediaQueryChange = () => {
       // When media query changes, trigger a resize to recalculate layouts
-      handleResize();
+      updateDimensions();
     };
     
     mediaQuery.addEventListener('change', handleMediaQueryChange);
     
     return () => {
-      window.removeEventListener('resize', handleResize);
+      window.removeEventListener('resize', updateDimensions);
       mediaQuery.removeEventListener('change', handleMediaQueryChange);
     };
   }, [reversedTimelineItems]);
@@ -351,8 +357,8 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
           
           cards.push({
             id: item.id,
-            x: cardRect.left + cardRect.width / 2, // Use the center of the actual card, not the container
-            y: cardRect.top + cardRect.height / 2 + window.scrollY, // Adjust for scroll
+            x: cardRect.left + cardRect.width / 2,
+            y: cardRect.top + cardRect.height / 2 + window.scrollY,
             width: cardRect.width,
             height: cardRect.height,
             position: positionType,
@@ -799,8 +805,13 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
     setScrollbarVisible(false);
   }, []);
   
+  // Add proper padding to the first timeline item if mobile scrollbar is showing
+  const getTimelineTopPadding = (): string => {
+    return isMobile ? "pt-20" : ""; // Add padding when horizontal scrollbar is visible
+  };
+  
   return (
-    <div className="relative">
+    <div className="relative w-full">
       {/* Fixed canvas covering the entire viewport */}
       <canvas 
         ref={canvasRef}
@@ -808,7 +819,18 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
       />
       
       {/* Timeline container */}
-      <div ref={timelineContainerRef} className="relative py-4 z-10">
+      <div 
+        ref={timelineContainerRef}
+        className={`container mx-auto relative py-4 ${getTimelineTopPadding()}`}
+      >
+        {/* First item as year marker */}
+        <div className="text-sm font-mono text-foreground/60 -top-8 my-8 sticky bg-background/50 backdrop-blur-sm py-2 flex items-center gap-2 z-10" data-year={getYearFromDate(reversedTimelineItems[0].startDate)}>
+          {getYearFromDate(reversedTimelineItems[0].startDate)}
+          {getYearFromDate(reversedTimelineItems[0].startDate) === 2025 && (
+            <span className="text-[10px] text-primary/90 font-medium">(Right Now)</span>
+          )}
+        </div>
+        
         {reversedTimelineItems.map((item, index) => {
           const currentYear = getYearFromDate(item.startDate);
           const showYearMarker = index === 0 || 
@@ -959,61 +981,122 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
         })}
       </div>
       
-      {/* Custom year scrollbar */}
-      <div 
-        ref={scrollbarRef}
-        className={`fixed right-8 top-1/2 -translate-y-1/2 z-20 transition-all duration-300 ${scrollbarVisible ? 'opacity-100 transform translate-x-0' : 'opacity-30 hover:opacity-60 transform translate-x-2'}`}
-        onMouseEnter={handleScrollbarMouseEnter}
-        onMouseLeave={handleScrollbarMouseLeave}
-      >
-        <div className="relative bg-background/30 backdrop-blur-sm border border-border/50 rounded-full py-2 px-1 shadow-md flex flex-col items-center">
-          {/* Scroll up button */}
-          <button 
-            className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-secondary/50 transition-colors"
-            onClick={() => scrollToYear(timelineYears[0])}
-            aria-label="Scroll to most recent year"
-          >
-            <ChevronUp size={16} className="text-foreground/80" />
-          </button>
-          
-          {/* Year markers */}
-          <div className="py-2 flex flex-col items-center">
-            {timelineYears.map(year => {
-              const isHighlighted = activeTag && activeYears.has(year);
-              const colors = activeTag && isHighlighted ? tagColors[activeTag] : null;
-              const isCurrentYear = year === 2025;
-              
-              return (
-                <div 
-                  key={year} 
-                  ref={el => el && yearsRef.current.set(year, el)}
-                  className={`
-                    my-1 px-3 py-1.5 text-xs font-mono rounded-md cursor-pointer 
-                    transition-all duration-200 flex items-center gap-2
-                    ${activeYear === year ? 'font-bold scale-110' : 'hover:bg-secondary/40'}
-                    ${colors ? `${colors.bg} ${colors.text} shadow-sm backdrop-blur-sm` : 'hover:bg-secondary/40'}
-                  `}
-                  onClick={() => scrollToYear(year)}
-                >
-                  {year}
-                  {isCurrentYear && (
-                    <span className="text-[10px] text-primary/90 font-medium">(Right Now)</span>
-                  )}
-                </div>
-              );
-            })}
+      {/* Custom year scrollbar - Vertical for desktop, Horizontal for mobile */}
+      {isMobile ? (
+        // Horizontal scrollbar for mobile
+        <div 
+          ref={scrollbarRef}
+          className={`fixed top-0 left-0 w-full z-20 transition-all duration-300 ${scrollbarVisible ? 'opacity-100' : 'opacity-40 hover:opacity-70'}`}
+          onMouseEnter={handleScrollbarMouseEnter}
+          onMouseLeave={handleScrollbarMouseLeave}
+          onTouchStart={handleScrollbarMouseEnter}
+          onTouchEnd={() => setTimeout(handleScrollbarMouseLeave, 3000)}
+        >
+          <div className="relative bg-background/30 backdrop-blur-sm border-b border-border/50 py-1 px-2 shadow-md flex items-center justify-center">
+            {/* Scroll left button */}
+            <button 
+              className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-secondary/50 transition-colors"
+              onClick={() => scrollToYear(timelineYears[timelineYears.length - 1])}
+              aria-label="Scroll to earliest year"
+            >
+              <ChevronLeft size={16} className="text-foreground/80" />
+            </button>
+            
+            {/* Year markers - horizontal layout */}
+            <div className="py-1 px-2 flex items-center space-x-2 overflow-x-auto no-scrollbar">
+              {timelineYears.map(year => {
+                const isHighlighted = activeTag && activeYears.has(year);
+                const colors = activeTag && isHighlighted ? tagColors[activeTag] : null;
+                const isCurrentYear = year === 2025;
+                
+                return (
+                  <div 
+                    key={year} 
+                    ref={el => el && yearsRef.current.set(year, el)}
+                    className={`
+                      px-3 py-1.5 text-xs font-mono rounded-md cursor-pointer whitespace-nowrap
+                      transition-all duration-200 flex items-center gap-1
+                      ${activeYear === year ? 'font-bold scale-110' : 'hover:bg-secondary/40'}
+                      ${colors ? `${colors.bg} ${colors.text} shadow-sm backdrop-blur-sm` : 'hover:bg-secondary/40'}
+                    `}
+                    onClick={() => scrollToYear(year)}
+                  >
+                    {year}
+                    {isCurrentYear && (
+                      <span className="text-[10px] text-primary/90 font-medium">(Right Now)</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            
+            {/* Scroll right button */}
+            <button 
+              className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-secondary/50 transition-colors"
+              onClick={() => scrollToYear(timelineYears[0])}
+              aria-label="Scroll to most recent year"
+            >
+              <ChevronRight size={16} className="text-foreground/80" />
+            </button>
           </div>
-          
-          {/* Scroll down button */}
-          <button 
-            className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-secondary/50 transition-colors"
-            onClick={() => scrollToYear(timelineYears[timelineYears.length - 1])}
-            aria-label="Scroll to earliest year"
-          >
-            <ChevronDown size={16} className="text-foreground/80" />
-          </button>
         </div>
-      </div>
+      ) : (
+        // Original vertical scrollbar for desktop
+        <div 
+          ref={scrollbarRef}
+          className={`fixed right-8 top-1/2 -translate-y-1/2 z-20 transition-all duration-300 ${scrollbarVisible ? 'opacity-100 transform translate-x-0' : 'opacity-30 hover:opacity-60 transform translate-x-2'}`}
+          onMouseEnter={handleScrollbarMouseEnter}
+          onMouseLeave={handleScrollbarMouseLeave}
+        >
+          <div className="relative bg-background/30 backdrop-blur-sm border border-border/50 rounded-full py-2 px-1 shadow-md flex flex-col items-center">
+            {/* Scroll up button */}
+            <button 
+              className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-secondary/50 transition-colors"
+              onClick={() => scrollToYear(timelineYears[0])}
+              aria-label="Scroll to most recent year"
+            >
+              <ChevronUp size={16} className="text-foreground/80" />
+            </button>
+            
+            {/* Year markers */}
+            <div className="py-2 flex flex-col items-center">
+              {timelineYears.map(year => {
+                const isHighlighted = activeTag && activeYears.has(year);
+                const colors = activeTag && isHighlighted ? tagColors[activeTag] : null;
+                const isCurrentYear = year === 2025;
+                
+                return (
+                  <div 
+                    key={year} 
+                    ref={el => el && yearsRef.current.set(year, el)}
+                    className={`
+                      my-1 px-3 py-1.5 text-xs font-mono rounded-md cursor-pointer 
+                      transition-all duration-200 flex items-center gap-2
+                      ${activeYear === year ? 'font-bold scale-110' : 'hover:bg-secondary/40'}
+                      ${colors ? `${colors.bg} ${colors.text} shadow-sm backdrop-blur-sm` : 'hover:bg-secondary/40'}
+                    `}
+                    onClick={() => scrollToYear(year)}
+                  >
+                    {year}
+                    {isCurrentYear && (
+                      <span className="text-[10px] text-primary/90 font-medium">(Right Now)</span>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+            
+            {/* Scroll down button */}
+            <button 
+              className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-secondary/50 transition-colors"
+              onClick={() => scrollToYear(timelineYears[timelineYears.length - 1])}
+              aria-label="Scroll to earliest year"
+            >
+              <ChevronDown size={16} className="text-foreground/80" />
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
