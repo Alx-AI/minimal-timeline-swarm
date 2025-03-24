@@ -21,10 +21,10 @@ const timelineData: TimelineItem[] = [
     id: "20",
     startDate: "May 2015",
     endDate: "Present",
-    title: "Discovered the Power of Neural Networks",
+    title: "Started My Journey into AI - Thanks Andrej!",
     company: "Self-Directed Research",
     location: "Remote",
-    description: "Read \"The Unreasonable Effectiveness of Recurrent Neural Networks\" by Andrej Karpathy, which sparked my journey into AI and machine learning. This seminal paper showed how neural networks could generate coherent text, code, and baby names that were surprisingly creative.",
+    description: "Read \"The Unreasonable Effectiveness of Recurrent Neural Networks\" by Andrej Karpathy, which sparked my journey into AI and machine learning. This seminal paper showed how neural networks could generate coherent text, code, and baby names that were surprisingly creative. It inspired me to learn about AI to enable me to do more with less. Also drove home how impactful having an expert sharing their point of view could be.",
     tags: ['AI', 'Education', 'Data', 'Media'],
     imageUrl: "",
     imageSlot: {
