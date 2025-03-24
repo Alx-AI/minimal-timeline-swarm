@@ -752,17 +752,32 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
   };
   
   // Add scroll to year functionality
-  const scrollToYear = useCallback((year: number) => {
+  const scrollToYear = useCallback((year: number, e?: React.MouseEvent) => {
+    // Always prevent default behavior to ensure no page reload
+    if (e) {
+      e.preventDefault();
+      
+      // If the clicked year is already active, do nothing
+      if (year === activeYear) {
+        return;
+      }
+    }
+
     const yearElements = document.querySelectorAll('[data-year]');
     for (let i = 0; i < yearElements.length; i++) {
       const element = yearElements[i];
       if (element.getAttribute('data-year') === year.toString()) {
         element.scrollIntoView({ behavior: 'smooth', block: 'start' });
         setActiveYear(year);
+        
+        // Update URL but don't reload
+        if (typeof history !== 'undefined' && history.pushState) {
+          history.pushState(null, '', `#year-${year}`);
+        }
         break;
       }
     }
-  }, []);
+  }, [activeYear]);
   
   // Handle scrollbar visibility
   useEffect(() => {
@@ -809,6 +824,19 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
   const getTimelineTopPadding = (): string => {
     return isMobile ? "pt-20" : ""; // Add padding when horizontal scrollbar is visible
   };
+  
+  // Add a listener to prevent hash changes from reloading the page
+  useEffect(() => {
+    const handleHashChange = (e: HashChangeEvent) => {
+      // Prevent default if the hash is just a year marker
+      if (e.newURL.includes('#year-')) {
+        e.preventDefault();
+      }
+    };
+
+    window.addEventListener('hashchange', handleHashChange);
+    return () => window.removeEventListener('hashchange', handleHashChange);
+  }, []);
   
   return (
     <div className="relative w-full">
@@ -996,7 +1024,7 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
             {/* Scroll left button */}
             <button 
               className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-secondary/50 transition-colors"
-              onClick={() => scrollToYear(timelineYears[timelineYears.length - 1])}
+              onClick={(e) => scrollToYear(timelineYears[timelineYears.length - 1], e)}
               aria-label="Scroll to earliest year"
             >
               <ChevronLeft size={16} className="text-foreground/80" />
@@ -1019,7 +1047,7 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
                       ${activeYear === year ? 'font-bold scale-110' : 'hover:bg-secondary/40'}
                       ${colors ? `${colors.bg} ${colors.text} shadow-sm backdrop-blur-sm` : 'hover:bg-secondary/40'}
                     `}
-                    onClick={() => scrollToYear(year)}
+                    onClick={(e) => scrollToYear(year, e)}
                   >
                     {year}
                     {isCurrentYear && (
@@ -1033,7 +1061,7 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
             {/* Scroll right button */}
             <button 
               className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-secondary/50 transition-colors"
-              onClick={() => scrollToYear(timelineYears[0])}
+              onClick={(e) => scrollToYear(timelineYears[0], e)}
               aria-label="Scroll to most recent year"
             >
               <ChevronRight size={16} className="text-foreground/80" />
@@ -1052,7 +1080,7 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
             {/* Scroll up button */}
             <button 
               className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-secondary/50 transition-colors"
-              onClick={() => scrollToYear(timelineYears[0])}
+              onClick={(e) => scrollToYear(timelineYears[0], e)}
               aria-label="Scroll to most recent year"
             >
               <ChevronUp size={16} className="text-foreground/80" />
@@ -1075,7 +1103,7 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
                       ${activeYear === year ? 'font-bold scale-110' : 'hover:bg-secondary/40'}
                       ${colors ? `${colors.bg} ${colors.text} shadow-sm backdrop-blur-sm` : 'hover:bg-secondary/40'}
                     `}
-                    onClick={() => scrollToYear(year)}
+                    onClick={(e) => scrollToYear(year, e)}
                   >
                     {year}
                     {isCurrentYear && (
@@ -1089,7 +1117,7 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
             {/* Scroll down button */}
             <button 
               className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-secondary/50 transition-colors"
-              onClick={() => scrollToYear(timelineYears[timelineYears.length - 1])}
+              onClick={(e) => scrollToYear(timelineYears[timelineYears.length - 1], e)}
               aria-label="Scroll to earliest year"
             >
               <ChevronDown size={16} className="text-foreground/80" />
