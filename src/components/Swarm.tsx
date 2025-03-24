@@ -22,7 +22,7 @@ interface SwarmProps {
   particleCount?: number;
 }
 
-const Swarm: React.FC<SwarmProps> = ({ particleCount = 45 }) => {
+const Swarm: React.FC<SwarmProps> = ({ particleCount = 200 }) => {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const cursorPositionRef = useRef({ x: 0, y: 0 });
   const [particles, setParticles] = useState<Particle[]>([]);

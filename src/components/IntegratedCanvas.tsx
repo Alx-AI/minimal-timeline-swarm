@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react'
 import { Calendar, Briefcase, MapPin, CircleOff, ChevronUp, ChevronDown } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
+import useCursorStore from '@/utils/cursorStore';
+import { Tag, tagColors } from './Header';
 
 // Define types for our integrated component
 export interface TimelineItem {
@@ -12,12 +14,15 @@ export interface TimelineItem {
   company: string;
   location: string;
   description: string;
-  skills: string[];
+  tags: Tag[];
   imageUrl?: string;
   imageSlot?: {
     url: string;
-    type: 'image' | 'video';
+    type: 'image' | 'video' | 'youtube';
     caption?: string;
+    position?: 'left' | 'right' | 'auto'; // Control preferred position of media
+    aspectRatio?: number; // Custom aspect ratio, defaults to 16/9
+    youtubeEmbed?: string; // YouTube iframe embed code
   };
 }
 
@@ -67,6 +72,7 @@ type ConnectionDot = {
 interface IntegratedCanvasProps {
   timelineItems: TimelineItem[];
   particleCount?: number;
+  activeTag?: Tag | null;
 }
 
 // Utility function to get year from date string (format: "Mon YYYY")
@@ -80,7 +86,8 @@ const getYearFromDate = (date: string): number => {
 
 const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({ 
   timelineItems, 
-  particleCount = 45 
+  particleCount = 45,
+  activeTag
 }) => {
   // Refs for the canvas and DOM elements
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -94,6 +101,9 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
   const cursorParticlesRef = useRef<CursorParticle[]>([]);
   const connectionDotsRef = useRef<ConnectionDot[]>([]);
   const timelineCardPositionsRef = useRef<TimelineCardPosition[]>([]);
+  
+  // Get the global cursor position from our store
+  const { x: globalCursorX, y: globalCursorY, updatePosition } = useCursorStore();
   
   // Animation refs
   const requestRef = useRef<number>();
@@ -131,6 +141,18 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
     return [...timelineItems].reverse();
   }, [timelineItems]);
   
+  // Get years that contain the active tag
+  const activeYears = useMemo(() => {
+    if (!activeTag) return new Set<number>();
+    const years = new Set<number>();
+    timelineItems.forEach(item => {
+      if (item.tags.includes(activeTag)) {
+        years.add(getYearFromDate(item.startDate));
+      }
+    });
+    return years;
+  }, [timelineItems, activeTag]);
+  
   // Update on scroll
   useEffect(() => {
     const handleScroll = () => {
@@ -150,6 +172,68 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
           height: window.innerHeight,
           documentHeight: document.body.scrollHeight
         });
+        
+        // When resizing, we need to recalculate timeline card positions
+        // Use a timeout to avoid excessive calculations during resize
+        if (timelineContainerRef.current) {
+          setTimeout(() => {
+            const cards: TimelineCardPosition[] = [];
+            
+            reversedTimelineItems.forEach((item, index) => {
+              const element = cardRefsMap.current.get(item.id);
+              if (element) {
+                const rect = element.getBoundingClientRect();
+                const position = index % 4;
+                
+                let positionType: 'left' | 'center' | 'right';
+                switch(position) {
+                  case 0: positionType = 'left'; break;
+                  case 2: positionType = 'right'; break;
+                  default: positionType = 'center';
+                }
+                
+                const timelineCardElement = element.querySelector('.timeline-card');
+                let cardRect = rect;
+                
+                if (timelineCardElement) {
+                  cardRect = timelineCardElement.getBoundingClientRect();
+                }
+                
+                let imageAreaY = undefined;
+                const mediaSlotElement = timelineCardElement?.querySelector('.media-slot, .media-slot-placeholder');
+                
+                if (mediaSlotElement) {
+                  const mediaRect = mediaSlotElement.getBoundingClientRect();
+                  // Check if media is beside content (horizontal layout) or below (vertical)
+                  const isHorizontalLayout = window.innerWidth >= 768 && 
+                    ((mediaRect.left > cardRect.left + cardRect.width / 2) || 
+                     (mediaRect.right < cardRect.left + cardRect.width / 2));
+                  
+                  if (isHorizontalLayout) {
+                    // For horizontal layout, use the bottom of the entire card
+                    imageAreaY = Math.max(cardRect.bottom, mediaRect.bottom) + window.scrollY;
+                  } else {
+                    // For vertical layout, use the bottom of the media area
+                    imageAreaY = mediaRect.bottom + window.scrollY;
+                  }
+                }
+                
+                cards.push({
+                  id: item.id,
+                  x: cardRect.left + cardRect.width / 2,
+                  y: cardRect.top + cardRect.height / 2 + window.scrollY,
+                  width: cardRect.width,
+                  height: cardRect.height,
+                  position: positionType,
+                  index,
+                  imageAreaY
+                });
+              }
+            });
+            
+            timelineCardPositionsRef.current = cards;
+          }, 100);
+        }
       }
     };
 
@@ -157,8 +241,20 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
     handleResize();
     window.addEventListener('resize', handleResize, { passive: true });
     
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+    // Also listen for media query changes specifically for the breakpoint we care about
+    const mediaQuery = window.matchMedia('(min-width: 768px)');
+    const handleMediaQueryChange = () => {
+      // When media query changes, trigger a resize to recalculate layouts
+      handleResize();
+    };
+    
+    mediaQuery.addEventListener('change', handleMediaQueryChange);
+    
+    return () => {
+      window.removeEventListener('resize', handleResize);
+      mediaQuery.removeEventListener('change', handleMediaQueryChange);
+    };
+  }, [reversedTimelineItems]);
   
   // Initialize particles when dimensions change
   useEffect(() => {
@@ -181,13 +277,17 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
   
   // Handle mouse movement with throttling
   const handleMouseMove = useCallback((e: MouseEvent) => {
+    // Update local mouse position
     setMousePosition({ x: e.clientX, y: e.clientY });
+    
+    // Update global cursor position
+    updatePosition(e.clientX, e.clientY);
     
     // Initialize cursor position on first mouse movement if it's at origin
     if (cursorPositionRef.current.x === 0 && cursorPositionRef.current.y === 0) {
       cursorPositionRef.current = { x: e.clientX, y: e.clientY };
     }
-  }, []);
+  }, [updatePosition]);
   
   useEffect(() => {
     const throttledMouseMove = (e: MouseEvent) => {
@@ -229,13 +329,24 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
             cardRect = timelineCardElement.getBoundingClientRect();
           }
           
-          // Find the image slot area if it exists (it's a direct child div with class containing "mt-4")
+          // Find the image/media slot area if it exists
           let imageAreaY = undefined;
-          const imageSlotElement = timelineCardElement?.querySelector('div[class*="mt-4"]');
+          const mediaSlotElement = timelineCardElement?.querySelector('.media-slot, .media-slot-placeholder');
           
-          if (imageSlotElement) {
-            const imageRect = imageSlotElement.getBoundingClientRect();
-            imageAreaY = imageRect.bottom + window.scrollY;
+          if (mediaSlotElement) {
+            const mediaRect = mediaSlotElement.getBoundingClientRect();
+            // Check if media is beside content (horizontal layout) or below (vertical)
+            const isHorizontalLayout = window.innerWidth >= 768 && 
+              ((mediaRect.left > cardRect.left + cardRect.width / 2) || 
+               (mediaRect.right < cardRect.left + cardRect.width / 2));
+            
+            if (isHorizontalLayout) {
+              // For horizontal layout, use the bottom of the entire card
+              imageAreaY = Math.max(cardRect.bottom, mediaRect.bottom) + window.scrollY;
+            } else {
+              // For vertical layout, use the bottom of the media area
+              imageAreaY = mediaRect.bottom + window.scrollY;
+            }
           }
           
           cards.push({
@@ -697,7 +808,7 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
       />
       
       {/* Timeline container */}
-      <div ref={timelineContainerRef} className="relative py-10 z-10">
+      <div ref={timelineContainerRef} className="relative py-4 z-10">
         {reversedTimelineItems.map((item, index) => {
           const currentYear = getYearFromDate(item.startDate);
           const showYearMarker = index === 0 || 
@@ -717,105 +828,129 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
             >
               {/* Year marker */}
               {showYearMarker && (
-                <div className="absolute -top-10 left-1/2 -translate-x-1/2 z-10">
-                  <div className="bg-background/90 backdrop-blur-sm border border-border/50 px-4 py-1 rounded-full text-sm font-mono text-primary animate-pulse-subtle">
+                <div className="absolute -top-8 left-1/2 -translate-x-1/2 z-10">
+                  <div className="bg-background/90 backdrop-blur-sm border border-border/50 px-4 py-1 rounded-full text-sm font-mono text-primary animate-pulse-subtle flex items-center gap-2">
                     {currentYear}
+                    {currentYear === 2025 && (
+                      <span className="text-xs text-primary/80 font-medium">(Right Now)</span>
+                    )}
                   </div>
                 </div>
               )}
               
               {/* Timeline card - made more compact */}
-              <div className={`timeline-card relative max-w-xl ${positionClass} group-hover:shadow-lg transition-all`}>
-                <div className={`flex ${isImageLeft ? 'flex-row-reverse' : 'flex-row'} gap-3 items-start`}>
-                  {/* Logo container - made smaller */}
-                  {item.imageUrl ? (
-                    <div className="w-14 h-14 shrink-0 overflow-hidden bg-card rounded-md border border-border/50 shadow-sm transform transition-transform duration-300 group-hover:scale-105">
-                      <AspectRatio ratio={1} className="h-full w-full">
-                        <img 
-                          src={item.imageUrl} 
-                          alt={`${item.company} logo`} 
-                          className="w-full h-full object-cover mix-blend-multiply"
-                        />
-                      </AspectRatio>
-                    </div>
-                  ) : (
-                    <div className="w-14 h-14 flex items-center justify-center shrink-0 bg-secondary/50 rounded-md border border-border/50">
-                      <CircleOff size={16} className="text-muted-foreground/40" />
-                    </div>
-                  )}
-                  
-                  {/* Content - more compact */}
-                  <Card className="flex-1 bg-card/80 backdrop-blur-sm border border-border/50 rounded-md overflow-hidden transition-all duration-300 group-hover:border-border">
-                    <div className="p-4">
-                      <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground mb-1">
-                        <Calendar size={12} />
-                        <span>{item.startDate}</span>
-                      </div>
-                      
-                      <h3 className="text-base font-sans font-medium tracking-tight">{item.title}</h3>
-                      <div className="flex flex-wrap items-center gap-2 text-xs mt-1">
-                        <Briefcase size={12} className="text-primary" />
-                        <span className="font-medium">{item.company}</span>
-                        {item.location && (
-                          <>
-                            <span className="text-muted-foreground">•</span>
-                            <div className="flex items-center gap-1">
-                              <MapPin size={12} className="text-muted-foreground" />
-                              <span className="text-muted-foreground">{item.location}</span>
-                            </div>
-                          </>
+              <div 
+                className={`timeline-card relative ${positionClass} group-hover:shadow-lg transition-all ${!item.imageSlot ? 'full-width-card' : ''}`}
+              >
+                {/* Card content with potential adaptive media layout */}
+                <div className="flex flex-col gap-4">
+                  {/* Top section with logo and content */}
+                  <div className="flex flex-row gap-3 items-start w-full lg:w-auto">
+                    {/* Content - more compact */}
+                    <Card className={`flex-1 bg-card/80 backdrop-blur-sm border border-border/50 rounded-md overflow-hidden transition-all duration-300 group-hover:border-border`}>
+                      <div className="p-5">
+                        <div className="flex items-center gap-2 text-xs font-mono text-muted-foreground mb-1">
+                          <Calendar size={12} />
+                          <span>{item.startDate}</span>
+                        </div>
+                        
+                        <h3 className="text-lg font-sans font-medium tracking-tight">{item.title}</h3>
+                        <div className="flex flex-wrap items-center gap-2 text-xs mt-1">
+                          <Briefcase size={12} className="text-primary" />
+                          <span className="font-medium">{item.company}</span>
+                          {item.location && (
+                            <>
+                              <span className="text-muted-foreground">•</span>
+                              <div className="flex items-center gap-1">
+                                <MapPin size={12} className="text-muted-foreground" />
+                                <span className="text-muted-foreground">{item.location}</span>
+                              </div>
+                            </>
+                          )}
+                        </div>
+                        
+                        <p className="mt-3 text-sm font-mono text-foreground/90 max-w-none">{item.description}</p>
+                        
+                        {item.tags.length > 0 && (
+                          <div className="mt-4 flex flex-wrap gap-1.5">
+                            {item.tags.map((tag, idx) => {
+                              const colors = tagColors[tag];
+                              return (
+                                <span 
+                                  key={idx} 
+                                  className={`px-2 py-0.5 text-xs font-mono rounded-sm border border-border/10 ${colors.bg} ${colors.text}`}
+                                >
+                                  {tag}
+                                </span>
+                              );
+                            })}
+                          </div>
                         )}
                       </div>
-                      
-                      <p className="mt-2 text-sm font-mono text-foreground/80 max-w-xl">{item.description}</p>
-                      
-                      {item.skills.length > 0 && (
-                        <div className="mt-3 flex flex-wrap gap-1">
-                          {item.skills.map((skill, idx) => (
-                            <span 
-                              key={idx} 
-                              className="px-2 py-0.5 bg-secondary/50 text-secondary-foreground text-xs font-mono rounded-sm border border-border/50"
-                            >
-                              {skill}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </Card>
-                </div>
-                
-                {/* Image/Video slot placeholder */}
-                <div className={`mt-4 max-w-md ${positionClass} opacity-70 hover:opacity-100 transition-opacity`}>
-                  {item.imageSlot ? (
-                    <div className="border border-border/50 rounded-md overflow-hidden">
-                      {item.imageSlot.type === 'image' ? (
-                        <AspectRatio ratio={16/9} className="bg-card/30">
-                          <img 
-                            src={item.imageSlot.url} 
-                            alt={item.imageSlot.caption || `${item.company} project`} 
-                            className="w-full h-full object-cover"
-                          />
-                          {item.imageSlot.caption && (
-                            <div className="absolute bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm p-2 text-xs font-mono">
-                              {item.imageSlot.caption}
-                            </div>
-                          )}
-                        </AspectRatio>
-                      ) : (
-                        <AspectRatio ratio={16/9} className="bg-card/30">
-                          <div className="flex items-center justify-center w-full h-full">
-                            <p className="text-xs font-mono text-muted-foreground">Video content will appear here</p>
+                    </Card>
+                  </div>
+                  
+                  {/* Adaptive Media Content */}
+                  {item.imageSlot && (
+                    <div 
+                      className={`
+                        media-slot 
+                        ${positionClass} 
+                        opacity-100 hover:opacity-100 transition-opacity
+                        natural-media
+                        ${item.imageSlot.position ? `media-position-${item.imageSlot.position}` : 'media-position-auto'}
+                      `}
+                      data-media-slot={item.id}
+                    >
+                      <div className="border border-border/50 rounded-md overflow-hidden shadow-md h-auto">
+                        {item.imageSlot.type === 'image' ? (
+                          <div className="relative max-h-[500px] w-auto overflow-hidden bg-black/10">
+                            <img 
+                              src={item.imageSlot.url} 
+                              alt={item.imageSlot.caption || `${item.company} project`} 
+                              className="w-full h-auto object-contain max-h-[500px]"
+                            />
+                            {item.imageSlot.caption && (
+                              <div className="absolute bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm p-2 text-xs font-mono">
+                                {item.imageSlot.caption}
+                              </div>
+                            )}
                           </div>
-                        </AspectRatio>
-                      )}
-                    </div>
-                  ) : (
-                    <AspectRatio ratio={16/9} className="bg-card/10 border border-dashed border-border/30 rounded-md">
-                      <div className="flex items-center justify-center w-full h-full">
-                        <p className="text-xs font-mono text-muted-foreground/50">Media content placeholder</p>
+                        ) : item.imageSlot.type === 'video' ? (
+                          <div className="max-h-[500px] bg-black/90">
+                            <video 
+                              src={item.imageSlot.url} 
+                              controls
+                              preload="metadata"
+                              muted
+                              playsInline
+                              className="w-full h-auto max-h-[500px] object-contain"
+                            />
+                            {item.imageSlot.caption && (
+                              <div className="absolute bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm p-2 text-xs font-mono">
+                                {item.imageSlot.caption}
+                              </div>
+                            )}
+                          </div>
+                        ) : item.imageSlot.type === 'youtube' && item.imageSlot.youtubeEmbed ? (
+                          <div className="relative w-full aspect-video bg-black max-h-[500px]">
+                            <div 
+                              className="w-full h-full"
+                              dangerouslySetInnerHTML={{ __html: item.imageSlot.youtubeEmbed }}
+                            />
+                            {item.imageSlot.caption && (
+                              <div className="absolute bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm p-2 text-xs font-mono">
+                                {item.imageSlot.caption}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="flex items-center justify-center w-full h-full max-h-[450px]">
+                            <p className="text-xs font-mono text-muted-foreground">Media content will appear here</p>
+                          </div>
+                        )}
                       </div>
-                    </AspectRatio>
+                    </div>
                   )}
                 </div>
               </div>
@@ -831,7 +966,7 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
         onMouseEnter={handleScrollbarMouseEnter}
         onMouseLeave={handleScrollbarMouseLeave}
       >
-        <div className="relative bg-background/30 backdrop-blur-sm border border-border/50 rounded-full py-2 px-1 shadow-md">
+        <div className="relative bg-background/30 backdrop-blur-sm border border-border/50 rounded-full py-2 px-1 shadow-md flex flex-col items-center">
           {/* Scroll up button */}
           <button 
             className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-secondary/50 transition-colors"
@@ -843,16 +978,30 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
           
           {/* Year markers */}
           <div className="py-2 flex flex-col items-center">
-            {timelineYears.map(year => (
-              <div 
-                key={year} 
-                ref={el => el && yearsRef.current.set(year, el)}
-                className={`my-1 px-3 py-1.5 text-xs font-mono rounded-md cursor-pointer transition-all duration-200 ${activeYear === year ? 'bg-primary/20 font-bold text-primary scale-110' : 'hover:bg-secondary/40'}`}
-                onClick={() => scrollToYear(year)}
-              >
-                {year}
-              </div>
-            ))}
+            {timelineYears.map(year => {
+              const isHighlighted = activeTag && activeYears.has(year);
+              const colors = activeTag && isHighlighted ? tagColors[activeTag] : null;
+              const isCurrentYear = year === 2025;
+              
+              return (
+                <div 
+                  key={year} 
+                  ref={el => el && yearsRef.current.set(year, el)}
+                  className={`
+                    my-1 px-3 py-1.5 text-xs font-mono rounded-md cursor-pointer 
+                    transition-all duration-200 flex items-center gap-2
+                    ${activeYear === year ? 'font-bold scale-110' : 'hover:bg-secondary/40'}
+                    ${colors ? `${colors.bg} ${colors.text} shadow-sm backdrop-blur-sm` : 'hover:bg-secondary/40'}
+                  `}
+                  onClick={() => scrollToYear(year)}
+                >
+                  {year}
+                  {isCurrentYear && (
+                    <span className="text-[10px] text-primary/90 font-medium">(Right Now)</span>
+                  )}
+                </div>
+              );
+            })}
           </div>
           
           {/* Scroll down button */}

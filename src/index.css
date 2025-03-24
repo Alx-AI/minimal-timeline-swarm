@@ -1,4 +1,3 @@
-
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Work+Sans:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
@@ -104,32 +103,117 @@
     @apply w-px h-full bg-border absolute left-0 -z-10;
   }
 
+  /* Timeline card basic styles */
   .timeline-card {
-    @apply backdrop-blur-sm transition-all duration-300;
-    width: 90%;
+    @apply bg-background/80 backdrop-blur p-4 rounded-lg w-full max-w-7xl mx-auto shadow transition-shadow;
+    @apply flex flex-col gap-6;
+    @apply transition-all duration-300;
   }
-
+  
+  /* Timeline card hover effect */
   .timeline-card:hover {
     @apply -translate-y-1;
   }
-  
-  /* Organic shapes for timeline cards */
-  .timeline-card::before {
-    content: '';
-    position: absolute;
-    top: -10px;
-    left: -10px;
-    right: -10px;
-    bottom: -10px;
-    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
-    background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.07) 100%);
-    z-index: -1;
-    opacity: 0;
-    transition: opacity 0.5s ease;
+
+  /* Timeline card larger screen styles */
+  @media (min-width: 1024px) {
+    .timeline-card {
+      display: flex;
+      flex-direction: row;
+      gap: 2rem; /* gap-8 */
+      width: 95%;
+      max-width: 1300px;
+    }
+    
+    .timeline-card.left-aligned {
+      align-self: flex-start;
+    }
+    
+    .timeline-card.right-aligned {
+      align-self: flex-end;
+    }
+    
+    .timeline-card.centered {
+      align-self: center;
+    }
+    
+    /* Full-width card when no media */
+    .timeline-card.full-width-card .flex-1 {
+      width: 100%;
+    }
+  }
+
+  /* Card content base styles */
+  .timeline-card div > .flex-1 {
+    @apply w-full;
   }
   
-  .timeline-card:hover::before {
-    opacity: 1;
+  /* Card content larger screen styles */
+  @media (min-width: 1024px) {
+    .timeline-card div > .flex-1 {
+      width: 40%; /* w-2/5 */
+      flex-shrink: 0;
+    }
+    
+    /* When card has a media slot, adjust content width */
+    .timeline-card:not(.full-width-card) div > .flex-1 {
+      max-width: 500px;
+    }
+  }
+
+  /* Media slot basic styling */
+  .media-slot {
+    @apply w-full transition-all;
+  }
+  
+  /* Media slot larger screen styles */
+  @media (min-width: 1024px) {
+    .media-slot {
+      width: 60%; /* w-3/5 */
+      max-width: 800px;
+    }
+    
+    .media-slot.natural-media {
+      width: auto;
+      flex: 1;
+    }
+    
+    .media-slot.natural-media img,
+    .media-slot.natural-media video {
+      object-fit: contain;
+      max-height: 500px;
+    }
+  }
+
+  /* Media positioning classes - for large screens only */
+  @media (min-width: 1024px) {
+    .media-position-left {
+      order: -1; /* order-first */
+    }
+    
+    .media-position-right {
+      order: 999; /* order-last */
+    }
+    
+    .timeline-card.left-aligned .media-position-auto {
+      order: -1; /* order-first */
+    }
+    
+    .timeline-card.right-aligned .media-position-auto {
+      order: 999; /* order-last */
+    }
+    
+    .timeline-card.centered .media-position-auto {
+      order: 999; /* order-last */
+    }
+  }
+
+  /* Full width for content and media on mobile */
+  @media (max-width: 1023px) {
+    .timeline-card div > .flex-1,
+    .media-slot {
+      width: 100%;
+    }
   }
 }
 
@@ -185,6 +269,105 @@
   
   .animate-pulse-subtle {
     animation: year-marker-pulse 5s infinite ease-in-out;
+  }
+}
+
+/* Media slot adaptive layout */
+@layer components {
+  /* Base styles for media slots */
+  .media-slot {
+    @apply transition-all duration-300 w-full;
+  }
+  
+  /* For natural aspect ratio media */
+  .natural-media {
+    width: auto;
+  }
+  
+  /* Allow text to take full width when no media */
+  .full-width-card {
+    max-width: 100% !important;
+    width: 100% !important;
+  }
+  
+  /* Ensure timeline card is always using column layout initially */
+  .timeline-card > div {
+    @apply flex-col gap-4;
+  }
+  
+  /* Media slot positioning based on screen size */
+  @media (min-width: 1024px) {
+    /* Create a flex layout for timeline cards on medium and larger screens */
+    .timeline-card > div {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 2rem; /* gap-8 */
+    }
+    
+    /* Adjust card width */
+    .timeline-card {
+      width: 95% !important;
+      max-width: 1300px !important;
+    }
+    
+    /* Text content should be wider */
+    .timeline-card div > .flex-1 {
+      max-width: 700px;
+    }
+    
+    /* Position based options */
+    .media-position-left {
+      order: -1; /* order-first */
+    }
+    
+    .media-position-right {
+      order: 999; /* order-last */
+    }
+    
+    /* For auto positioning based on the timeline item position */
+    /* Left-aligned timeline items should have media on the right */
+    .timeline-card[class*="mr-auto"] .media-position-auto {
+      order: 999; /* order-last */
+    }
+    
+    /* Right-aligned timeline items should have media on the left */
+    .timeline-card[class*="ml-auto"] .media-position-auto {
+      order: -1; /* order-first */
+    }
+    
+    /* Center-aligned can alternate */
+    .timeline-card[class*="mx-auto"]:nth-of-type(odd) .media-position-auto {
+      order: -1; /* order-first */
+    }
+    
+    .timeline-card[class*="mx-auto"]:nth-of-type(even) .media-position-auto {
+      order: 999; /* order-last */
+    }
+  }
+  
+  /* Fallback to vertical layout on smaller screens (up to large) */
+  @media (max-width: 1023px) {
+    .timeline-card > div {
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .media-slot {
+      width: 100%;
+      order: 999; /* order-last */
+    }
+    
+    .timeline-card {
+      width: 100% !important;
+    }
+    
+    /* Ensure both content and media take full width on mobile */
+    .timeline-card div > .flex-1,
+    .natural-media {
+      max-width: none !important;
+      width: 100% !important;
+    }
   }
 }
 
