@@ -851,13 +851,7 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
         ref={timelineContainerRef}
         className={`container mx-auto relative py-4 ${getTimelineTopPadding()}`}
       >
-        {/* First item as year marker */}
-        <div className="text-sm font-mono text-foreground/60 -top-8 my-8 sticky bg-background/50 backdrop-blur-sm py-2 flex items-center gap-2 z-10" data-year={getYearFromDate(reversedTimelineItems[0].startDate)}>
-          {getYearFromDate(reversedTimelineItems[0].startDate)}
-          {getYearFromDate(reversedTimelineItems[0].startDate) === 2025 && (
-            <span className="text-[10px] text-primary/90 font-medium">(Right Now)</span>
-          )}
-        </div>
+
         
         {reversedTimelineItems.map((item, index) => {
           const currentYear = getYearFromDate(item.startDate);
