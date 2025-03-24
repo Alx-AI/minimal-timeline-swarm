@@ -18,6 +18,23 @@ const timelineData: TimelineItem[] = [
     imageUrl: ""
   },
   {
+    id: "20",
+    startDate: "May 2015",
+    endDate: "Present",
+    title: "Discovered the Power of Neural Networks",
+    company: "Self-Directed Research",
+    location: "Remote",
+    description: "Read \"The Unreasonable Effectiveness of Recurrent Neural Networks\" by Andrej Karpathy, which sparked my journey into AI and machine learning. This seminal paper showed how neural networks could generate coherent text, code, and baby names that were surprisingly creative.",
+    tags: ['AI', 'Education', 'Data', 'Media'],
+    imageUrl: "",
+    imageSlot: {
+      url: "/assets/baby.png",
+      type: "image",
+      caption: "RNN Generated Baby Names",
+      position: "auto"
+    }
+  },
+  {
     id: "2",
     startDate: "July 2016",
     endDate: "Present", 
