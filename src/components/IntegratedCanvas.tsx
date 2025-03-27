@@ -1018,8 +1018,8 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
             {/* Scroll left button */}
             <button 
               className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-secondary/50 transition-colors"
-              onClick={(e) => scrollToYear(timelineYears[timelineYears.length - 1], e)}
-              aria-label="Scroll to earliest year"
+              onClick={(e) => scrollToYear(timelineYears[0], e)}
+              aria-label="Scroll to most recent year"
             >
               <ChevronLeft size={16} className="text-foreground/80" />
             </button>
@@ -1055,8 +1055,8 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
             {/* Scroll right button */}
             <button 
               className="flex items-center justify-center w-8 h-8 rounded-full hover:bg-secondary/50 transition-colors"
-              onClick={(e) => scrollToYear(timelineYears[0], e)}
-              aria-label="Scroll to most recent year"
+              onClick={(e) => scrollToYear(timelineYears[timelineYears.length - 1], e)}
+              aria-label="Scroll to earliest year"
             >
               <ChevronRight size={16} className="text-foreground/80" />
             </button>
