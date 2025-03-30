@@ -277,7 +277,7 @@ const timelineData: TimelineItem[] = [
     id: "17",
     startDate: "November 2024",
     endDate: "Present",
-    title: "Led Six-Figure AI Implementation Deals with PE, VC, and Hedge Funds",
+    title: "Led AI Implementation Deals with PE, VC, and Hedge Funds",
     company: "Every Inc.",
     location: "Brooklyn, New York",
     description: "Began consulting with Every Inc., guiding enterprise AI strategies and implementations. Led multiple six-figure deals training private equity, VC, hedge fund, and tech companies on best practices of AI adoption with strategic implementation.",
