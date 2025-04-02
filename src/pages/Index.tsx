@@ -393,7 +393,7 @@ const Index = () => {
           <p className="text-lg mb-6">Reach out</p>
           <div className="flex items-center justify-center gap-6">
             <a 
-              href="https://x.com/theHeroShep/" 
+              href="https://x.com/alxai_/" 
               target="_blank" 
               rel="noopener noreferrer"
               className="text-foreground/80 hover:text-primary transition-colors"
