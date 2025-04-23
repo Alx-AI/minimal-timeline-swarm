@@ -222,6 +222,24 @@ const timelineData: TimelineItem[] = [
     }
   },
   {
+    id: "13dt",
+    startDate: "November 2023",
+    endDate: "Present",
+    title: "AI Textbooks & Synthetic Data for Model Fine‑Tuning",
+    company: "Datatomes",
+    location: "Remote",
+    description: "Created Datatomes — built \"textbooks\" for AI, generating high‑quality synthetic data optimized for fine‑tuning. Got an interview with Y Combinator and sold tens of thousands of dollars of data, including to Arcee AI, a pioneer in the small‑language‑model space.",
+    tags: ['AI', 'Data', 'Education'],
+    imageUrl: "",
+    imageSlot: {
+      url: "",
+      type: "youtube",
+      caption: "Datatomes Animation",
+      position: "auto",
+      youtubeEmbed: '<div style="width:100%;height:100%;display:flex;justify-content:center;align-items:center;background:linear-gradient(45deg, #1a1a1a 25%, #2a2a2a 25%, #2a2a2a 50%, #1a1a1a 50%, #1a1a1a 75%, #2a2a2a 75%, #2a2a2a 100%);background-size:5px 5px;overflow:hidden;font-family:monospace;color:#aaa;font-size:1.8vw;text-align:center;"><style>@keyframes text-anim { 0% { content: \"D\"; } 5% { content: \"DA\"; } 10% { content: \"DAT\"; } 15% { content: \"DATA\"; } 20% { content: \"DATA G\"; } 25% { content: \"DATA GE\"; } 30% { content: \"DATA GEN\"; } 35% { content: \"DATA GENE\"; } 40% { content: \"DATA GENER\"; } 45% { content: \"DATA GENERA\"; } 50% { content: \"DATA GENERAT\"; } 55% { content: \"DATA GENERATI\"; } 60% { content: \"DATA GENERATIN\"; } 65% { content: \"DATA GENERATING\"; } 70% { content: \"DATA GENERATING.\"; } 75% { content: \"DATA GENERATING..\"; } 80% { content: \"DATA GENERATING...\"; } 85% { content: \"DATA GENERATING...\"; } 100% { content: \"DATA GENERATING...\"; } } .anim-text::after { content: \"\"; animation: text-anim 4s linear infinite; white-space: pre; } </style><span class=\"anim-text\"></span></div>'
+    }
+  },
+  {
     id: "14",
     startDate: "December 2023",
     endDate: "Present",
