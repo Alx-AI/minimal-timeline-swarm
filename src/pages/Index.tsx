@@ -7,17 +7,6 @@ import { Twitter, Mail, Youtube, Copy, Check } from 'lucide-react';
 
 const timelineData: TimelineItem[] = [
   {
-    id: "19",
-    startDate: "November 2023",
-    endDate: "Present",
-    title: "LLM as an Art Director: AI as Leverage for Human Expertise",
-    company: "Plai Labs",
-    location: "Remote",
-    description: "Published research on using LLMs as Art Directors (LaDi) to enhance text-to-media generation. AI isn't a product, it's leverage. A film's art director helps bring abstract ideas into reality. LaDi is a step towards helping people with prompts for AI image/video generation tools to make sure the output aligns with their vision. I'm all about AI to empower people. Read the paper: https://arxiv.org/abs/2311.03716",
-    tags: ['AI', 'Media', 'Education'],
-    imageUrl: ""
-  },
-  {
     id: "1",
     startDate: "June 2013",
     endDate: "Present",
@@ -231,6 +220,17 @@ const timelineData: TimelineItem[] = [
       caption: "PlaiDay App Launch",
       position: "auto"
     }
+  },
+  {
+    id: "19",
+    startDate: "November 2023",
+    endDate: "Present",
+    title: "LLM as an Art Director: AI as Leverage for Human Expertise",
+    company: "Plai Labs",
+    location: "Remote",
+    description: "Published research on using LLMs as Art Directors (LaDi) to enhance text-to-media generation. AI isn't a product, it's leverage. A film's art director helps bring abstract ideas into reality. LaDi is a step towards helping people with prompts for AI image/video generation tools to make sure the output aligns with their vision. I'm all about AI to empower people. Read the paper: https://arxiv.org/abs/2311.03716",
+    tags: ['AI', 'Media', 'Education'],
+    imageUrl: ""
   },
   {
     id: "13dt",
