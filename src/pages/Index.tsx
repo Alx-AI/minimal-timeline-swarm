@@ -230,7 +230,14 @@ const timelineData: TimelineItem[] = [
     location: "Remote",
     description: "Published research on using LLMs as Art Directors (LaDi) to enhance text-to-media generation. AI isn't a product, it's leverage. A film's art director helps bring abstract ideas into reality. LaDi is a step towards helping people with prompts for AI image/video generation tools to make sure the output aligns with their vision. I'm all about AI to empower people. Read the paper: https://arxiv.org/abs/2311.03716",
     tags: ['AI', 'Media', 'Education'],
-    imageUrl: ""
+    imageUrl: "",
+    imageSlot: {
+      url: "/assets/LaDi.png",
+      type: "image",
+      caption: "LaDi: LLM as an Art Director",
+      position: "auto",
+      href: "https://arxiv.org/abs/2311.03716"
+    }
   },
   {
     id: "13dt",

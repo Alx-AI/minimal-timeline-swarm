@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback, useMemo } from 'react';
+import ClickableImage from './ClickableImage';
 import { Calendar, Briefcase, MapPin, CircleOff, ChevronUp, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
@@ -23,6 +24,7 @@ export interface TimelineItem {
     position?: 'left' | 'right' | 'auto'; // Control preferred position of media
     aspectRatio?: number; // Custom aspect ratio, defaults to 16/9
     youtubeEmbed?: string; // YouTube iframe embed code
+    href?: string; // URL for clickable images
   };
 }
 
@@ -948,18 +950,12 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
                     >
                       <div className="border border-border/50 rounded-md overflow-hidden shadow-md h-auto">
                         {item.imageSlot.type === 'image' ? (
-                          <div className="relative max-h-[500px] w-auto overflow-hidden bg-black/10">
-                            <img 
-                              src={item.imageSlot.url} 
-                              alt={item.imageSlot.caption || `${item.company} project`} 
-                              className="w-full h-auto object-contain max-h-[500px]"
-                            />
-                            {item.imageSlot.caption && (
-                              <div className="absolute bottom-0 left-0 right-0 bg-background/80 backdrop-blur-sm p-2 text-xs font-mono">
-                                {item.imageSlot.caption}
-                              </div>
-                            )}
-                          </div>
+                          <ClickableImage
+                            src={item.imageSlot.url}
+                            alt={item.imageSlot.caption || `${item.company} project`}
+                            href={item.imageSlot.href || '#'}
+                            caption={item.imageSlot.caption}
+                          />
                         ) : item.imageSlot.type === 'video' ? (
                           <div className="max-h-[500px] bg-black/90">
                             <video 
