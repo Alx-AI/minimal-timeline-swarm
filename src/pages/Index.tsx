@@ -346,7 +346,7 @@ const timelineData: TimelineItem[] = [
   {
     id: "19",
     startDate: "January 2025",
-    endDate: "Present",
+    endDate: "May 2025",
     title: "AI Consulting and Staff Writer",
     company: "Every Inc.",
     location: "Brooklyn, New York",
@@ -357,7 +357,62 @@ const timelineData: TimelineItem[] = [
       url: "/assets/cw.png",
       type: "image",
       caption: "Context Window Newsletter",
-      position: "auto"
+      position: "auto",
+      href: "https://every.to/@AlxAi"
+    }
+  },
+  {
+    id: "20",
+    startDate: "May 2025",
+    endDate: "Present",
+    title: "Made AI Adoption Mandatory at $10B Hedge Fund",
+    company: "Every Inc. x Walleye Capital",
+    location: "New York, NY",
+    description: "Led AI strategy and implementation training for Walleye Capital, a $10 billion hedge fund. Helped the firm transition to mandatory AI usage across all departments, implementing tools like their custom 'Current' analytics platform, and training portfolio managers and analysts to become 20% more effective through AI adoption.",
+    tags: ['AI', 'Education', 'Data'],
+    imageUrl: "",
+    imageSlot: {
+      url: "/assets/10bAI.png",
+      type: "image",
+      caption: "AI Strategy for Finance",
+      position: "auto",
+      href: "https://every.to/podcast/at-this-10-billion-hedge-fund-using-ai-just-became-mandatory"
+    }
+  },
+  {
+    id: "21",
+    startDate: "May 2025",
+    endDate: "Present",
+    title: "Helped Build 7-Figure AI Consulting Business",
+    company: "Every Studio",
+    location: "New York, NY",
+    description: "As head of AI training and consulting at Every Studio, helped build a seven-figure AI consulting business in less than a year. Led workshops and implementation programs for clients in finance, media, and tech, transforming organizations from having a few AI-curious users to achieving over 60% power user adoption.",
+    tags: ['AI', 'Education', 'Data'],
+    imageUrl: "",
+    imageSlot: {
+      url: "/assets/7figure.png",
+      type: "image",
+      caption: "Enterprise AI Adoption",
+      position: "auto",
+      href: "https://every.to/p/how-we-built-a-7-figure-ai-consulting-business-in-less-than-a-yea"
+    }
+  },
+  {
+    id: "22",
+    startDate: "May 2025",
+    endDate: "Present",
+    title: "Featured in New York Times Profile on Every",
+    company: "Every Inc.",
+    location: "New York, NY",
+    description: "Featured in New York Times article \"Will Writing Survive A.I.? This Media Company Is Betting on It.\" The piece announced Every's $2 million funding round from investors including Reid Hoffman, valuing the company at $25 million. As head of AI training, I've helped build our consulting practice mentioned in the article that works with clients from media companies to private equity firms, showing them how to increase productivity through AI adoption rather than eliminating jobs.",
+    tags: ['AI', 'Media', 'Education'],
+    imageUrl: "",
+    imageSlot: {
+      url: "/assets/everyteam.webp",
+      type: "image",
+      caption: "NYT Coverage: \"Will Writing Survive A.I.?\"",
+      position: "auto",
+      href: "https://www.nytimes.com/2025/05/21/business/media/ai-every-media-startup.html"
     }
   }
 ];

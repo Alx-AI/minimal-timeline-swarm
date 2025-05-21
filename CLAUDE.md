@@ -1,4 +1,6 @@
-# CLAUDE.md - Guidelines for working with this repository
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## Site Structure
 
@@ -43,6 +45,7 @@
 
 - `npm run dev`: Start the development server
 - `npm run build`: Build for production
+- `npm run build:dev`: Build for development mode
 - `npm run lint`: Run ESLint to check code quality
 - `npm run preview`: Preview the built application
 
