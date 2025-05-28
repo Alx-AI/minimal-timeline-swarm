@@ -75,6 +75,7 @@ interface IntegratedCanvasProps {
   timelineItems: TimelineItem[];
   particleCount?: number;
   activeTag?: Tag | null;
+  rainbowActive?: boolean;
 }
 
 // Utility function to get year from date string (format: "Mon YYYY")
@@ -89,7 +90,8 @@ const getYearFromDate = (date: string): number => {
 const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({ 
   timelineItems, 
   particleCount = 45,
-  activeTag
+  activeTag,
+  rainbowActive = false
 }) => {
   // Refs for the canvas and DOM elements
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -422,13 +424,33 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
     ctx.fillStyle = backgroundColor;
     ctx.fillRect(0, 0, dimensions.width, dimensions.height);
 
+    // Define rainbow colors
+    const rainbowColors = [
+      { r: 138, g: 43, b: 226 },   // Purple (AI)
+      { r: 59, g: 130, b: 246 },   // Blue (Education)
+      { r: 34, g: 197, b: 94 },    // Green (Robotics)
+      { r: 250, g: 204, b: 21 },   // Yellow (Games)
+      { r: 239, g: 68, b: 68 },    // Red (Media)
+      { r: 6, g: 182, b: 212 },    // Cyan (Data)
+      { r: 236, g: 72, b: 153 }    // Pink (Life Sciences)
+    ];
+    
     // Draw background particles
-    for (const particle of particles) {
+    for (let i = 0; i < particles.length; i++) {
+      const particle = particles[i];
       ctx.beginPath();
       ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
-      ctx.fillStyle = isDarkMode 
-        ? `rgba(255, 255, 255, ${particle.opacity})` 
-        : `rgba(0, 0, 0, ${particle.opacity})`;
+      
+      if (rainbowActive) {
+        // Use a random rainbow color for each particle
+        const colorIndex = Math.floor(Math.random() * rainbowColors.length);
+        const color = rainbowColors[colorIndex];
+        ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${particle.opacity})`;
+      } else {
+        ctx.fillStyle = isDarkMode 
+          ? `rgba(255, 255, 255, ${particle.opacity})` 
+          : `rgba(0, 0, 0, ${particle.opacity})`;
+      }
       ctx.fill();
     }
     
@@ -541,22 +563,39 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
           // Draw dot
           ctx.beginPath();
           ctx.arc(x, y, dot.size, 0, Math.PI * 2);
-          ctx.fillStyle = isDarkMode 
-            ? `rgba(255, 255, 255, ${dot.opacity})` 
-            : `rgba(0, 0, 0, ${dot.opacity})`;
+          
+          if (rainbowActive) {
+            // Use a random rainbow color for each dot
+            const colorIndex = Math.floor(Math.random() * rainbowColors.length);
+            const color = rainbowColors[colorIndex];
+            ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${dot.opacity})`;
+          } else {
+            ctx.fillStyle = isDarkMode 
+              ? `rgba(255, 255, 255, ${dot.opacity})` 
+              : `rgba(0, 0, 0, ${dot.opacity})`;
+          }
           ctx.fill();
         }
       }
     }
     
     // Draw cursor sparkle particles
-    for (const particle of cursorParticlesRef.current) {
+    for (let i = 0; i < cursorParticlesRef.current.length; i++) {
+      const particle = cursorParticlesRef.current[i];
       const opacityFade = particle.life / particle.maxLife;
       ctx.beginPath();
       ctx.arc(particle.x, particle.y, particle.size * opacityFade, 0, Math.PI * 2);
-      ctx.fillStyle = isDarkMode 
-        ? `rgba(255, 255, 255, ${particle.opacity * opacityFade})` 
-        : `rgba(0, 0, 0, ${particle.opacity * opacityFade})`;
+      
+      if (rainbowActive) {
+        // Use a random rainbow color for each sparkle
+        const colorIndex = Math.floor(Math.random() * rainbowColors.length);
+        const color = rainbowColors[colorIndex];
+        ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${particle.opacity * opacityFade})`;
+      } else {
+        ctx.fillStyle = isDarkMode 
+          ? `rgba(255, 255, 255, ${particle.opacity * opacityFade})` 
+          : `rgba(0, 0, 0, ${particle.opacity * opacityFade})`;
+      }
       ctx.fill();
     }
     
@@ -612,7 +651,7 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
         ctx.stroke();
       }
     }
-  }, [dimensions.width, dimensions.height, mousePosition, particles]);
+  }, [dimensions.width, dimensions.height, mousePosition, particles, rainbowActive]);
   
   // Animation loop
   useEffect(() => {

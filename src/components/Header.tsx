@@ -47,13 +47,18 @@ interface HeaderProps {
   title: string;
   onTagClick?: (tag: Tag) => void;
   activeTag?: Tag | null;
+  onRainbowChange?: (active: boolean) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ name, title, onTagClick, activeTag }) => {
+const Header: React.FC<HeaderProps> = ({ name, title, onTagClick, activeTag, onRainbowChange }) => {
   const [dimensions, setDimensions] = useState({
     width: typeof window !== 'undefined' ? window.innerWidth : 1000,
     height: 350
   });
+  const [rainbowActive, setRainbowActive] = useState(false);
+  const [currentColorIndex, setCurrentColorIndex] = useState(0);
+  
+  const tagColorOrder: Tag[] = ['AI', 'Education', 'Robotics', 'Games', 'Media', 'Data', 'Life Sciences'];
   
   useEffect(() => {
     const handleResize = () => {
@@ -67,6 +72,39 @@ const Header: React.FC<HeaderProps> = ({ name, title, onTagClick, activeTag }) =
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+  
+  useEffect(() => {
+    if (rainbowActive) {
+      const interval = setInterval(() => {
+        setCurrentColorIndex((prev) => (prev + 1) % tagColorOrder.length);
+      }, 500);
+      
+      const timeout = setTimeout(() => {
+        setRainbowActive(false);
+        setCurrentColorIndex(0);
+        onRainbowChange?.(false);
+      }, 10000);
+      
+      return () => {
+        clearInterval(interval);
+        clearTimeout(timeout);
+      };
+    }
+  }, [rainbowActive, onRainbowChange]);
+  
+  const handlePeopleDoubleClick = () => {
+    if (rainbowActive) {
+      // If already active, turn it off
+      setRainbowActive(false);
+      setCurrentColorIndex(0);
+      onRainbowChange?.(false);
+    } else {
+      // If not active, turn it on
+      setRainbowActive(true);
+      setCurrentColorIndex(0);
+      onRainbowChange?.(true);
+    }
+  };
 
   const dotWidth = Math.min(dimensions.width * 0.5, 500);
 
@@ -81,6 +119,7 @@ const Header: React.FC<HeaderProps> = ({ name, title, onTagClick, activeTag }) =
             position="center" 
             width={dotWidth}
             height={dimensions.height}
+            rainbowActive={rainbowActive}
           />
         </div>
       </div>
@@ -89,9 +128,16 @@ const Header: React.FC<HeaderProps> = ({ name, title, onTagClick, activeTag }) =
         <Sparkles size={16} className="text-primary" />
         <h2 className="text-2xl md:text-3xl lg:text-4xl font-semibold text-foreground">
           Building teams & tools to empower{' '}
-          <span className="relative">
+          <span 
+            className={`relative cursor-pointer select-none transition-all duration-300 ${
+              rainbowActive 
+                ? `${tagColors[tagColorOrder[currentColorIndex]].bg} ${tagColors[tagColorOrder[currentColorIndex]].text} px-1 rounded`
+                : ''
+            }`}
+            onDoubleClick={handlePeopleDoubleClick}
+          >
             people
-            <span className="absolute bottom-0 left-0 w-full h-[1px] bg-primary"></span>
+            <span className={`absolute bottom-0 left-0 w-full h-[1px] bg-primary ${rainbowActive ? 'opacity-0' : ''}`}></span>
           </span>
           {' '}with AI
         </h2>

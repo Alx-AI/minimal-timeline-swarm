@@ -15,9 +15,10 @@ interface TitleDotsProps {
   position: 'left' | 'right' | 'center';
   width: number;
   height: number;
+  rainbowActive?: boolean;
 }
 
-const TitleDots: React.FC<TitleDotsProps> = ({ svgPath, position, width, height }) => {
+const TitleDots: React.FC<TitleDotsProps> = ({ svgPath, position, width, height, rainbowActive = false }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [dots, setDots] = useState<Dot[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -234,7 +235,18 @@ const TitleDots: React.FC<TitleDotsProps> = ({ svgPath, position, width, height 
       // Draw dots with cursor interaction
       const isDarkMode = document.documentElement.classList.contains('dark');
       
-      dots.forEach(dot => {
+      // Define rainbow colors (same as in IntegratedCanvas)
+      const rainbowColors = [
+        { r: 138, g: 43, b: 226 },   // Purple (AI)
+        { r: 59, g: 130, b: 246 },   // Blue (Education)
+        { r: 34, g: 197, b: 94 },    // Green (Robotics)
+        { r: 250, g: 204, b: 21 },   // Yellow (Games)
+        { r: 239, g: 68, b: 68 },    // Red (Media)
+        { r: 6, g: 182, b: 212 },    // Cyan (Data)
+        { r: 236, g: 72, b: 153 }    // Pink (Life Sciences)
+      ];
+      
+      dots.forEach((dot, index) => {
         // Calculate distance to cursor - use local cursor position
         const dx = localMousePosition.x - dot.x;
         const dy = localMousePosition.y - dot.y;
@@ -285,9 +297,17 @@ const TitleDots: React.FC<TitleDotsProps> = ({ svgPath, position, width, height 
         // Draw dot
         ctx.beginPath();
         ctx.arc(x, y, dot.r, 0, Math.PI * 2);
-        ctx.fillStyle = isDarkMode 
-          ? `rgba(255, 255, 255, ${dot.opacity})` 
-          : `rgba(0, 0, 0, ${dot.opacity})`;
+        
+        if (rainbowActive) {
+          // Use a random rainbow color for each dot
+          const colorIndex = Math.floor(Math.random() * rainbowColors.length);
+          const color = rainbowColors[colorIndex];
+          ctx.fillStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${dot.opacity})`;
+        } else {
+          ctx.fillStyle = isDarkMode 
+            ? `rgba(255, 255, 255, ${dot.opacity})` 
+            : `rgba(0, 0, 0, ${dot.opacity})`;
+        }
         ctx.fill();
       });
       
@@ -295,7 +315,6 @@ const TitleDots: React.FC<TitleDotsProps> = ({ svgPath, position, width, height 
       // to prevent performance issues
       if (dots.length < 300) {
         // Connect dots to closest particles
-        ctx.strokeStyle = isDarkMode ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)';
         ctx.lineWidth = 0.5;
         
         // Draw connections between nearby dots
@@ -310,9 +329,17 @@ const TitleDots: React.FC<TitleDotsProps> = ({ svgPath, position, width, height 
             
             if (distance < connectionRadius) {
               const opacity = 0.1 * (1 - distance / connectionRadius);
-              ctx.strokeStyle = isDarkMode 
-                ? `rgba(255, 255, 255, ${opacity})` 
-                : `rgba(0, 0, 0, ${opacity})`;
+              
+              if (rainbowActive) {
+                // Use a random rainbow color for each connection
+                const colorIndex = Math.floor(Math.random() * rainbowColors.length);
+                const color = rainbowColors[colorIndex];
+                ctx.strokeStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${opacity})`;
+              } else {
+                ctx.strokeStyle = isDarkMode 
+                  ? `rgba(255, 255, 255, ${opacity})` 
+                  : `rgba(0, 0, 0, ${opacity})`;
+              }
                 
               ctx.beginPath();
               ctx.moveTo(dots[i].x, dots[i].y);
@@ -339,9 +366,17 @@ const TitleDots: React.FC<TitleDotsProps> = ({ svgPath, position, width, height 
             
             if (distance < cursorConnectionRadius) {
               const opacity = 0.15 * (1 - distance / cursorConnectionRadius);
-              ctx.strokeStyle = isDarkMode 
-                ? `rgba(255, 255, 255, ${opacity})` 
-                : `rgba(0, 0, 0, ${opacity})`;
+              
+              if (rainbowActive) {
+                // Use a random rainbow color for cursor connections
+                const colorIndex = Math.floor(Math.random() * rainbowColors.length);
+                const color = rainbowColors[colorIndex];
+                ctx.strokeStyle = `rgba(${color.r}, ${color.g}, ${color.b}, ${opacity})`;
+              } else {
+                ctx.strokeStyle = isDarkMode 
+                  ? `rgba(255, 255, 255, ${opacity})` 
+                  : `rgba(0, 0, 0, ${opacity})`;
+              }
                 
               ctx.beginPath();
               ctx.moveTo(dot.x, dot.y);
@@ -363,7 +398,7 @@ const TitleDots: React.FC<TitleDotsProps> = ({ svgPath, position, width, height 
         cancelAnimationFrame(requestRef.current);
       }
     };
-  }, [dots, localMousePosition, containerSize, isMobile]);
+  }, [dots, localMousePosition, containerSize, isMobile, rainbowActive]);
 
   return (
     <div 

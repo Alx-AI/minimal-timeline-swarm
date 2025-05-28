@@ -439,6 +439,7 @@ const Index = () => {
   const [mounted, setMounted] = useState(false);
   const [activeTag, setActiveTag] = useState<Tag | null>(null);
   const [emailCopied, setEmailCopied] = useState(false);
+  const [rainbowActive, setRainbowActive] = useState(false);
   const [dimensions, setDimensions] = useState({
     width: typeof window !== 'undefined' ? window.innerWidth : 1000,
     height: 350
@@ -487,6 +488,7 @@ const Index = () => {
           title="Building teams & tools to empower people with AI."
           onTagClick={handleTagClick}
           activeTag={activeTag}
+          onRainbowChange={setRainbowActive}
         />
         
         <main className="mt-8">
@@ -494,6 +496,7 @@ const Index = () => {
             timelineItems={timelineData} 
             particleCount={45} 
             activeTag={activeTag}
+            rainbowActive={rainbowActive}
           />
         </main>
         
@@ -543,6 +546,7 @@ const Index = () => {
               position="center" 
               width={bottomDotWidth}
               height={350}
+              rainbowActive={rainbowActive}
             />
           </div>
         </div>
