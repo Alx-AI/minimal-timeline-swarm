@@ -414,6 +414,24 @@ const timelineData: TimelineItem[] = [
       position: "auto",
       href: "https://www.nytimes.com/2025/05/21/business/media/ai-every-media-startup.html"
     }
+  },
+  {
+    id: "23",
+    startDate: "May 2025",
+    endDate: "Present",
+    title: "Published by DeepMind: A Bucket List Moment",
+    company: "Google DeepMind x Every",
+    location: "Remote",
+    description: "As someone who's been following DeepMind with awe from AlphaGo → AlphaFold → AlphaStar → Gato → AlphaCode & more... Bucket list moment, to be published by them. My article on Google's vision to 'Make Tech Human Again' explored how thoughtful arenas for AI can transform our relationship with technology. So much more can come from intentional AI design that enhances rather than replaces human capabilities.",
+    tags: ['AI', 'Media', 'Education'],
+    imageUrl: "",
+    imageSlot: {
+      url: "/assets/deepmind_plublished.png",
+      type: "image",
+      caption: "DeepMind Published Article",
+      position: "auto",
+      href: "https://every.to/context-window/google-s-ai-vision-make-tech-human-again"
+    }
   }
 ];
 
