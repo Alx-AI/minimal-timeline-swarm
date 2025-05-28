@@ -426,7 +426,7 @@ const timelineData: TimelineItem[] = [
     tags: ['AI', 'Media', 'Education'],
     imageUrl: "",
     imageSlot: {
-      url: "/assets/deepmind_plublished.png",
+      url: "/assets/deepmind_published.png",
       type: "image",
       caption: "DeepMind Published Article",
       position: "auto",
