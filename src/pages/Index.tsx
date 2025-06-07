@@ -432,7 +432,25 @@ const timelineData: TimelineItem[] = [
       position: "auto",
       href: "https://every.to/context-window/google-s-ai-vision-make-tech-human-again"
     }
-  }
+  },
+  {
+    id: "24",
+    startDate: "June 2025",
+    endDate: "Present",
+    title: "Created AI Diplomacy: A Living Benchmark for LLM Strategy",
+    company: "AI Diplomacy x Every",
+    location: "Remote",
+    description: "I wanted to know which models were trustworthy, and which ones would win when competing under pressure. So I built AI Diplomacy—18 top language models competing in strategic negotiations, streaming live on Twitch. Watching o3 master deception while Claude pursued peace taught me more about AI behavior than any traditional benchmark could. My moonshot? This becomes a completely new genre of game, where humans learn to use AI effectively just by playing. Because we are what we measure, and I was hoping to encourage AI to strategize so I might learn from them—and do it in a way that might make people outside of AI care about it too.",
+    tags: ['AI', 'Media', 'Games'],
+    imageUrl: "",
+    imageSlot: {
+      url: "/assets/diplomacy.png",
+      type: "image",
+      caption: "AI Diplomacy: Where Models Play Politics",
+      position: "auto",
+      href: "https://every.to/diplomacy"
+    }
+  },
 ];
 
 const Index = () => {
