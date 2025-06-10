@@ -1000,9 +1000,10 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
                             <video 
                               src={item.imageSlot.url} 
                               controls
-                              preload="metadata"
+                              preload="none"
                               muted
                               playsInline
+                              loading="lazy"
                               className="w-full h-auto max-h-[500px] object-contain"
                             />
                             {item.imageSlot.caption && (
