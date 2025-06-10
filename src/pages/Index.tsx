@@ -440,7 +440,10 @@ const timelineData: TimelineItem[] = [
     title: "Created AI Diplomacy: A Living Benchmark for LLM Strategy",
     company: "AI Diplomacy x Every",
     location: "Remote",
-    description: "I wanted to know which models were trustworthy, and which ones would win when competing under pressure. So I built AI Diplomacy—18 top language models competing in strategic negotiations, streaming live on Twitch. Watching o3 master deception while Claude pursued peace taught me more about AI behavior than any traditional benchmark could. My moonshot? This becomes a completely new genre of game, where humans learn to use AI effectively just by playing. Because we are what we measure, and I was hoping to encourage AI to strategize so I might learn from them—and do it in a way that might make people outside of AI care about it too.",
+    description: <><a href="https://www.businessinsider.com/diplomacy-ai-test-benchmark-who-won-anthropic-openai-meta-gemini-2025-6" target="_blank" rel="noopener noreferrer" className="underline hover:text-primary transition-colors">As seen on Business Insider</a> • We needed new benchmarks that are human, entertaining, and actually meaningful so I built AI Diplomacy—18 top language models compete to take over the world (or at least Europe).
+    Launched live on Twitch, it was awesome to watch o3 master deception while Claude pursued peace.
+    I learned more about AI behavior than ever before. Working towards defining a completely new genre of game, where humans learn to use AI effectively just by playing. 
+    Because we are what we measure, I was hoping to encourage AI to strategize so we might learn from them—and do it in a way that might make people outside of AI care about it too!</>,
     tags: ['AI', 'Media', 'Games'],
     imageUrl: "",
     imageSlot: {

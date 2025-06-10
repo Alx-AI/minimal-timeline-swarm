@@ -14,7 +14,7 @@ export interface TimelineItem {
   title: string;
   company: string;
   location: string;
-  description: string;
+  description: string | React.ReactElement;
   tags: Tag[];
   imageUrl?: string;
   imageSlot?: {
@@ -954,7 +954,7 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
                           )}
                         </div>
                         
-                        <p className="mt-3 text-sm font-mono text-foreground/90 max-w-none">{item.description}</p>
+                        <div className="mt-3 text-sm font-mono text-foreground/90 max-w-none">{item.description}</div>
                         
                         {item.tags.length > 0 && (
                           <div className="mt-4 flex flex-wrap gap-1.5">
