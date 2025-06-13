@@ -997,7 +997,7 @@ const IntegratedCanvas: React.FC<IntegratedCanvasProps> = ({
                           />
                         ) : item.imageSlot.type === 'video' ? (
                           <div className="max-h-[500px] bg-black/90">
-                            <video 
+                            <video
                               src={item.imageSlot.url} 
                               controls
                               preload="none"
