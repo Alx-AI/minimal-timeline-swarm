@@ -454,6 +454,24 @@ const timelineData: TimelineItem[] = [
       href: "https://every.to/diplomacy"
     }
   },
+  {
+    id: "25",
+    startDate: "June 2025",
+    endDate: "Present",
+    title: "'Benchmarks are Memes' Talk • Best Speaker • AI Engineer Conference",
+    company: "AI Engineer World's Fair + Latent Space Podcast",
+    location: "San Francisco, CA",
+    description: "Incredibly honored to win best speaker in the Tiny Teams track at the 3000 person AI Engineer 2025 conference and join the organizer Shawn 'Swyx' Wang on his Latent Space podcast right after. My talk explored how benchmarks are like memes - ideas that spread and literally shape what AI becomes good at. Launched AI Diplomacy live on stage. The core message: we all can create benchmarks for what matters to us, shaping AI's future.",
+    tags: ['AI', 'Media', 'Education'],
+    imageUrl: "",
+    imageSlot: {
+      url: "/assets/latentspace_faces.png",
+      type: "image",
+      caption: "Best Speaker Award at AI Engineer 2025",
+      position: "auto",
+      href: "https://www.latent.space/p/aiewf-2025-keynotes"
+    }
+  },
 ];
 
 const Index = () => {
