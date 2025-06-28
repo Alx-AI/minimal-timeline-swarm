@@ -433,7 +433,7 @@ const timelineData: TimelineItem[] = [
       href: "https://every.to/context-window/google-s-ai-vision-make-tech-human-again"
     }
   },
-  {
+  { 
     id: "24",
     startDate: "June 2025",
     endDate: "Present",
