@@ -472,6 +472,24 @@ const timelineData: TimelineItem[] = [
       href: "https://www.latent.space/p/aiewf-2025-keynotes"
     }
   },
+  {
+    id: "26",
+    startDate: "June 2025",
+    endDate: "Present",
+    title: "Featured on Northeastern Next Podcast",
+    company: "Northeastern Alumni Podcast",
+    location: "Remote",
+    description: "Thanks to Thomas Switzgable and Northeastern Alumni for the conversation. We talked about the co-op program, AI's evolution, and some projects I've worked on with great teams. From AI Camp to AI Diplomacy with Tyler Marques, my current projects at Every Inc. and a lot more! Nice to reflect on how much I learned from classmates and colleagues at each step along the way; so grateful.",
+    tags: ['AI', 'Education', 'Media'],
+    imageUrl: "",
+    imageSlot: {
+      url: "/assets/podcast.png",
+      type: "image",
+      caption: "Northeastern Next Podcast",
+      position: "auto",
+      href: "https://open.spotify.com/episode/23WlJHmzzgFodWRDNC8qMF?si=D2XnQu6JRZqszdr19CO0Rw"
+    }
+  },
 ];
 
 const Index = () => {
