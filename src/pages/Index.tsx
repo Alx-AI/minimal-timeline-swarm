@@ -465,7 +465,7 @@ const timelineData: TimelineItem[] = [
     tags: ['AI', 'Media', 'Education'],
     imageUrl: "",
     imageSlot: {
-      url: "/assets/memes_talk.png",
+      url: "/assets/memes_talk.jpg",
       type: "image",
       caption: "Best Speaker Award at AI Engineer 2025",
       position: "auto",
