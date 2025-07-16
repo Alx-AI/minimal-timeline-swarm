@@ -465,11 +465,11 @@ const timelineData: TimelineItem[] = [
     tags: ['AI', 'Media', 'Education'],
     imageUrl: "",
     imageSlot: {
-      url: "/assets/latentspace_faces.png",
+      url: "/assets/memes_talk.png",
       type: "image",
       caption: "Best Speaker Award at AI Engineer 2025",
       position: "auto",
-      href: "https://www.latent.space/p/aiewf-2025-keynotes"
+      href: "https://www.youtube.com/watch?v=W3khHzajE04"
     }
   },
   {
