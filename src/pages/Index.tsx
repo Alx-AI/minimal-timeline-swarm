@@ -471,7 +471,7 @@ const timelineData: TimelineItem[] = [
       position: "auto",
       href: "https://www.youtube.com/watch?v=W3khHzajE04"
     }
-  },
+  }, 
   {
     id: "26",
     startDate: "June 2025",
