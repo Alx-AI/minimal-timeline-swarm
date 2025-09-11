@@ -490,6 +490,24 @@ const timelineData: TimelineItem[] = [
       href: "https://open.spotify.com/episode/23WlJHmzzgFodWRDNC8qMF?si=D2XnQu6JRZqszdr19CO0Rw"
     }
   },
+  {
+    id: "27",
+    startDate: "September 2025",
+    endDate: "Present",
+    title: "Panelist with Anthropic: 𝗔𝗜 𝗶𝗻 𝘁𝗵𝗲 𝗖𝗼𝗿𝗿𝗶𝗱𝗼𝗿𝘀 𝗼𝗳 𝗣𝗼𝘄𝗲𝗿: 𝗖𝗮𝗻 𝗟𝗮𝗿𝗴𝗲 𝗟𝗮𝗻𝗴𝘂𝗮𝗴𝗲 𝗠𝗼𝗱𝗲𝗹𝘀 (𝗟𝗟𝗠𝘀) 𝗥𝗲𝘀𝗵𝗮𝗽𝗲 𝗣𝗼𝗹𝗶𝗰𝘆 𝗮𝗻𝗱 𝗗𝗶𝗽𝗹𝗼𝗺𝗮𝗰𝘆?",
+    company: "Young China Watchers Hong Kong",
+    location: "Hong Kong",
+    description: "Shared the stage with Joseph Castellano (Anthropic) and Professor Jinghan Zeng. Talked about AI in the context of international relations and governments. But also how games like AI Diplomacy help us explore new ideas, learn about ourselves, and understand the world better. Human judgment and cultural context still matter most. AI multiplies what experts can do, it doesn't replace them.",
+    tags: ['AI', 'Games', 'Education'],
+    imageUrl: "",
+    imageSlot: {
+      url: "/assets/YCW_panel.jpeg",
+      type: "image",
+      caption: "AI as Leverage Panel",
+      position: "auto",
+      href: "https://www.linkedin.com/feed/update/urn:li:activity:7371799336319414272/"
+    }
+  },
 ];
 
 const Index = () => {
