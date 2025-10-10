@@ -508,6 +508,23 @@ const timelineData: TimelineItem[] = [
       href: "https://www.linkedin.com/feed/update/urn:li:activity:7371799336319414272/"
     }
   },
+  {
+    id: "28",
+    startDate: "October 2025",
+    endDate: "Present",
+    title: "Recognized as Top OpenAI API User Worldwide with 100B+ Tokens Processed",
+    company: "OpenAI",
+    location: "Remote",
+    description: "Very grateful to be recognized as one of the top OpenAI API users worldwide, having processed over 100 billion tokens. Love talking to the alien super intelligence. A lot of them coming from experimentation and play...",
+    tags: ['AI', 'Data'],
+    imageUrl: "",
+    imageSlot: {
+      url: "/assets/me_openai.png",
+      type: "image",
+      caption: "Top OpenAI API User Recognition",
+      position: "auto"
+    }
+  },
 ];
 
 const Index = () => {
