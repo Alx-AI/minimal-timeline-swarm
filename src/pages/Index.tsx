@@ -522,7 +522,8 @@ const timelineData: TimelineItem[] = [
       url: "/assets/me_openai.png",
       type: "image",
       caption: "Top OpenAI API User Recognition",
-      position: "auto"
+      position: "auto",
+      href: "https://www.linkedin.com/feed/update/urn:li:activity:7381814186340884480/"
     }
   },
 ];
