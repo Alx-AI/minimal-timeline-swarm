@@ -526,7 +526,7 @@ const timelineData: TimelineItem[] = [
       href: "https://www.linkedin.com/feed/update/urn:li:activity:7381814186340884480/"
     }
   },
-];
+]; 
 
 const Index = () => {
   const [mounted, setMounted] = useState(false);
